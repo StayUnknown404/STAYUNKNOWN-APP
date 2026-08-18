@@ -9,11 +9,16 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { getCatalog, Product } from '../services/api';
-
+import ProductDetails from './ProductDetails';
+import Bag from './Bag';
 type Tab = 'home' | 'shop' | 'wishlist' | 'bag' | 'account';
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>('home');
+  const [selectedProduct, setSelectedProduct] =
+  useState<Product | null>(null);
+
+  const [showBag, setShowBag] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -79,10 +84,32 @@ export default function Home() {
           <ProductCard key={product.id} product={product} />
         ))}
       </View>
+      
     );
   };
 
-  const renderContent = () => {
+  const renderContent = () => { 
+    if (selectedProduct) {
+  return (
+    <ProductDetails
+      product={selectedProduct}
+      onBack={() => setSelectedProduct(null)}
+      onBag={() => {
+        setSelectedProduct(null);
+        setShowBag(true);
+      }}
+    />
+  );
+}
+
+if (showBag) {
+  return (
+    <Bag
+      onBack={() => setShowBag(false)}
+      onCheckout={() => {}}
+    />
+  );
+}
     if (tab === 'shop') {
       return (
         <ScrollView
@@ -311,10 +338,13 @@ export default function Home() {
         />
 
         <NavItem
-          label="BAG"
-          active={tab === 'bag'}
-          onPress={() => setTab('bag')}
-        />
+  label="BAG"
+  active={tab === 'bag'}
+  onPress={() => {
+    setTab('bag');
+    setShowBag(true);
+  }}
+/>
 
         <NavItem
           label="ACCOUNT"
@@ -371,7 +401,10 @@ function ProductCard({ product }: { product: Product }) {
     product.stock <= product.lowStockThreshold;
 
   return (
-    <Pressable style={styles.product}>
+    <Pressable
+  style={styles.product}
+  onPress={() => setSelectedProduct(product)}
+>
       <View style={styles.productImage}>
         <Text style={styles.placeholder}>
           STAYUNKNOWN
