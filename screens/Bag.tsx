@@ -6,6 +6,7 @@ import {
   Text,
   View,
   Pressable,
+  Image,
 } from 'react-native';
 import {
   getCart,
@@ -69,10 +70,18 @@ export default function Bag({
                 style={styles.item}
               >
                 <View style={styles.image}>
-                  <Text style={styles.placeholder}>
-                    STAYUNKNOWN
-                  </Text>
-                </View>
+  {item.product.image ? (
+    <Image
+      source={{ uri: item.product.image }}
+      style={styles.imageActual}
+      resizeMode="cover"
+    />
+  ) : (
+    <Text style={styles.placeholder}>
+      STAYUNKNOWN
+    </Text>
+  )}
+</View>
 
                 <View style={styles.itemInfo}>
                   <Text style={styles.name}>
@@ -257,7 +266,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
+  imageActual: {
+  width: '100%',
+  height: '100%',
+  },
   placeholder: {
     color: '#555',
     fontSize: 8,
