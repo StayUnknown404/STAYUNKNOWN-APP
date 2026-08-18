@@ -1104,7 +1104,50 @@ const styles = StyleSheet.create({
     paddingTop: 30,
     gap: 12,
   },
+  authBox: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+  },
 
+  authLabel: {
+    color: '#777',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1,
+    marginTop: 18,
+    marginBottom: 8,
+  },
+
+  authInput: {
+    height: 52,
+    borderWidth: 1,
+    borderColor: '#292929',
+    color: '#fff',
+    paddingHorizontal: 15,
+    fontSize: 14,
+    backgroundColor: '#080808',
+  },
+
+  authMessage: {
+    color: '#aaa',
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 15,
+    marginBottom: 10,
+  },
+
+  authSwitch: {
+    paddingVertical: 18,
+    alignItems: 'center',
+  },
+
+  authSwitchText: {
+    color: '#777',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1,
+    textAlign: 'center',
+  },
   bottomNav: {
     height: 70,
     backgroundColor: '#050505',
