@@ -250,10 +250,17 @@ export default function Home() {
     }
 
     if (tab === 'wishlist') {
-      return (
+  return (
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.content}
+    >
+      <PageHeader title="WISHLIST" />
+
+      {wishlist.length === 0 ? (
         <View style={styles.emptyScreen}>
           <Text style={styles.largeTitle}>
-            WISHLIST
+            NOTHING SAVED
           </Text>
 
           <Text style={styles.emptyText}>
@@ -269,8 +276,36 @@ export default function Home() {
             </Text>
           </Pressable>
         </View>
-      );
-    }
+      ) : (
+        <>
+          <Text style={styles.wishlistCount}>
+            {wishlist.length}{' '}
+            {wishlist.length === 1
+              ? 'ITEM'
+              : 'ITEMS'}{' '}
+            SAVED
+          </Text>
+
+          <View style={styles.productGrid}>
+            {wishlist.map(product => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onPress={() =>
+                  setSelectedProduct(product)
+                }
+                onWishlist={() =>
+                  handleWishlistToggle(product)
+                }
+                wishlisted={true}
+              />
+            ))}
+          </View>
+        </>
+      )}
+    </ScrollView>
+  );
+}
 
     if (tab === 'bag') {
       return (
@@ -727,6 +762,14 @@ function NavItem({
 }
 
 const styles = StyleSheet.create({
+  wishlistCount: {
+  color: '#666',
+  fontSize: 10,
+  fontWeight: '800',
+  letterSpacing: 1,
+  paddingHorizontal: 20,
+  marginBottom: 10,
+},
   container: {
     flex: 1,
     backgroundColor: '#000',
