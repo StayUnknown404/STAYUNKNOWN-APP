@@ -7,6 +7,7 @@ import {
   View,
   Pressable,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { getCatalog, Product } from '../services/api';
 import ProductDetails from './ProductDetails';
