@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -8,148 +8,313 @@ import {
   Pressable,
 } from 'react-native';
 
+type Tab = 'home' | 'shop' | 'wishlist' | 'bag' | 'account';
+
 export default function Home() {
-  return (
-    <SafeAreaView style={styles.container}>
+  const [tab, setTab] = useState<Tab>('home');
+
+  const renderContent = () => {
+    if (tab === 'shop') {
+      return (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.content}
+        >
+          <PageHeader title="SHOP" />
+
+          <View style={styles.searchBox}>
+            <Text style={styles.searchText}>Search products</Text>
+            <Text style={styles.searchIcon}>⌕</Text>
+          </View>
+
+          <SectionTitle title="COLLECTIONS" />
+
+          <View style={styles.collectionGrid}>
+            <CollectionCard title="NEW DROP" />
+            <CollectionCard title="ESSENTIALS" />
+            <CollectionCard title="TEES" />
+            <CollectionCard title="HOODIES" />
+          </View>
+
+          <SectionTitle title="ALL PRODUCTS" />
+
+          <View style={styles.productGrid}>
+            <ProductCard name="UNKNOWN TEE" price="₦45,000" />
+            <ProductCard name="SILENCE HOODIE" price="₦85,000" />
+            <ProductCard name="TRACK PANTS" price="₦70,000" />
+            <ProductCard name="UNKNOWN CAP" price="₦35,000" />
+          </View>
+        </ScrollView>
+      );
+    }
+
+    if (tab === 'wishlist') {
+      return (
+        <View style={styles.emptyScreen}>
+          <Text style={styles.largeTitle}>WISHLIST</Text>
+          <Text style={styles.emptyText}>
+            Save pieces you want to come back to.
+          </Text>
+          <Pressable
+            style={styles.whiteButton}
+            onPress={() => setTab('shop')}
+          >
+            <Text style={styles.blackButtonText}>EXPLORE SHOP</Text>
+          </Pressable>
+        </View>
+      );
+    }
+
+    if (tab === 'bag') {
+      return (
+        <View style={styles.emptyScreen}>
+          <Text style={styles.largeTitle}>YOUR BAG</Text>
+          <Text style={styles.emptyText}>
+            Your bag is empty.
+          </Text>
+          <Pressable
+            style={styles.whiteButton}
+            onPress={() => setTab('shop')}
+          >
+            <Text style={styles.blackButtonText}>START SHOPPING</Text>
+          </Pressable>
+        </View>
+      );
+    }
+
+    if (tab === 'account') {
+      return (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.content}
+        >
+          <PageHeader title="ACCOUNT" />
+
+          <View style={styles.accountIntro}>
+            <Text style={styles.accountTitle}>STAYUNKNOWN</Text>
+            <Text style={styles.accountSubtitle}>
+              Your account, orders and preferences.
+            </Text>
+          </View>
+
+          <AccountRow title="My Orders" />
+          <AccountRow title="Notifications" />
+          <AccountRow title="Profile" />
+          <AccountRow title="Help & Support" />
+          <AccountRow title="About STAYUNKNOWN" />
+          <AccountRow title="Socials" />
+          <AccountRow title="Contact" />
+          <AccountRow title="Terms & Privacy" />
+
+          <View style={styles.accountActions}>
+            <Pressable style={styles.whiteButton}>
+              <Text style={styles.blackButtonText}>
+                SIGN IN / CREATE ACCOUNT
+              </Text>
+            </Pressable>
+
+            <Pressable style={styles.outlineButton}>
+              <Text style={styles.whiteButtonText}>
+                CONTINUE AS GUEST
+              </Text>
+            </Pressable>
+          </View>
+        </ScrollView>
+      );
+    }
+
+    return (
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.content}
       >
-        {/* HEADER */}
         <View style={styles.header}>
           <Text style={styles.logo}>STAYUNKNOWN</Text>
 
           <View style={styles.headerActions}>
-            <Pressable>
-              <Text style={styles.icon}>⌕</Text>
-            </Pressable>
-
-            <Pressable>
-              <Text style={styles.icon}>♡</Text>
-            </Pressable>
-
-            <Pressable>
-              <Text style={styles.icon}>▢</Text>
-            </Pressable>
+            <Text style={styles.headerIcon}>⌕</Text>
+            <Text style={styles.headerIcon}>♡</Text>
+            <Text style={styles.headerIcon}>▢</Text>
           </View>
         </View>
 
-        {/* HERO / DROP */}
         <View style={styles.hero}>
-          <Text style={styles.kicker}>STAYUNKNOWN</Text>
+          <Text style={styles.heroKicker}>STAYUNKNOWN</Text>
 
-          <Text style={styles.heroTitle}>NEW DROP</Text>
+          <Text style={styles.heroTitle}>MOVE IN SILENCE.</Text>
 
           <Text style={styles.heroDescription}>
-            Move in silence. Limited pieces. No restocks.
+            New pieces. Limited drops. Built for those who don't need to be
+            seen.
           </Text>
 
-          <Pressable style={styles.primaryButton}>
-            <Text style={styles.primaryButtonText}>SHOP THE DROP</Text>
+          <Pressable
+            style={styles.whiteButton}
+            onPress={() => setTab('shop')}
+          >
+            <Text style={styles.blackButtonText}>SHOP THE DROP</Text>
           </Pressable>
         </View>
 
-        {/* COLLECTIONS */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>COLLECTIONS</Text>
+        <SectionTitle title="LATEST DROP" />
 
-          <Pressable>
-            <Text style={styles.viewAll}>VIEW ALL</Text>
+        <View style={styles.featureCard}>
+          <Text style={styles.featureLabel}>NEW</Text>
+          <Text style={styles.featureTitle}>UNKNOWN</Text>
+          <Text style={styles.featureSubtitle}>
+            The latest STAYUNKNOWN pieces.
+          </Text>
+
+          <Pressable
+            style={styles.outlineButton}
+            onPress={() => setTab('shop')}
+          >
+            <Text style={styles.whiteButtonText}>VIEW DROP</Text>
           </Pressable>
         </View>
+
+        <SectionTitle title="COLLECTIONS" />
 
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.horizontal}
         >
-          <Pressable style={styles.collection}>
-            <Text style={styles.collectionTitle}>NEW DROP</Text>
-            <Text style={styles.collectionArrow}>→</Text>
-          </Pressable>
-
-          <Pressable style={styles.collection}>
-            <Text style={styles.collectionTitle}>ESSENTIALS</Text>
-            <Text style={styles.collectionArrow}>→</Text>
-          </Pressable>
-
-          <Pressable style={styles.collection}>
-            <Text style={styles.collectionTitle}>LIMITED</Text>
-            <Text style={styles.collectionArrow}>→</Text>
-          </Pressable>
+          <CollectionCard title="NEW DROP" />
+          <CollectionCard title="ESSENTIALS" />
+          <CollectionCard title="LIMITED" />
         </ScrollView>
 
-        {/* NEW ARRIVALS */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>NEW ARRIVALS</Text>
-
-          <Pressable>
-            <Text style={styles.viewAll}>VIEW ALL</Text>
-          </Pressable>
-        </View>
+        <SectionTitle title="BEST SELLERS" />
 
         <View style={styles.productGrid}>
-          <Pressable style={styles.product}>
-            <View style={styles.productImage}>
-              <Text style={styles.imagePlaceholder}>STAYUNKNOWN</Text>
-
-              <View style={styles.wishlist}>
-                <Text style={styles.heart}>♡</Text>
-              </View>
-            </View>
-
-            <Text style={styles.productName}>UNKNOWN TEE</Text>
-            <Text style={styles.productPrice}>₦45,000</Text>
-          </Pressable>
-
-          <Pressable style={styles.product}>
-            <View style={styles.productImage}>
-              <Text style={styles.imagePlaceholder}>STAYUNKNOWN</Text>
-
-              <View style={styles.wishlist}>
-                <Text style={styles.heart}>♡</Text>
-              </View>
-            </View>
-
-            <Text style={styles.productName}>SIGNATURE HOODIE</Text>
-            <Text style={styles.productPrice}>₦85,000</Text>
-          </Pressable>
+          <ProductCard name="UNKNOWN TEE" price="₦45,000" />
+          <ProductCard name="SILENCE HOODIE" price="₦85,000" />
         </View>
 
-        {/* BRAND STATEMENT */}
         <View style={styles.statement}>
           <Text style={styles.statementTitle}>MOVE IN SILENCE.</Text>
-
           <Text style={styles.statementText}>
-            STAYUNKNOWN is built for those who don't need to be seen to be
-            remembered.
+            STAYUNKNOWN is an independent streetwear brand from Lagos,
+            available worldwide.
           </Text>
         </View>
       </ScrollView>
+    );
+  };
 
-      {/* BOTTOM NAVIGATION */}
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.main}>{renderContent()}</View>
+
       <View style={styles.bottomNav}>
-        <Pressable>
-          <Text style={styles.activeNav}>HOME</Text>
-        </Pressable>
+        <NavItem
+          label="HOME"
+          active={tab === 'home'}
+          onPress={() => setTab('home')}
+        />
 
-        <Pressable>
-          <Text style={styles.nav}>SHOP</Text>
-        </Pressable>
+        <NavItem
+          label="SHOP"
+          active={tab === 'shop'}
+          onPress={() => setTab('shop')}
+        />
 
-        <Pressable>
-          <Text style={styles.nav}>♡</Text>
-        </Pressable>
+        <NavItem
+          label="♡"
+          active={tab === 'wishlist'}
+          onPress={() => setTab('wishlist')}
+        />
 
-        <Pressable>
-          <Text style={styles.nav}>BAG</Text>
-        </Pressable>
+        <NavItem
+          label="BAG"
+          active={tab === 'bag'}
+          onPress={() => setTab('bag')}
+        />
 
-        <Pressable>
-          <Text style={styles.nav}>ACCOUNT</Text>
-        </Pressable>
+        <NavItem
+          label="ACCOUNT"
+          active={tab === 'account'}
+          onPress={() => setTab('account')}
+        />
       </View>
     </SafeAreaView>
+  );
+}
+
+function PageHeader({ title }: { title: string }) {
+  return (
+    <View style={styles.pageHeader}>
+      <Text style={styles.pageTitle}>{title}</Text>
+    </View>
+  );
+}
+
+function SectionTitle({ title }: { title: string }) {
+  return (
+    <View style={styles.sectionHeader}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      <Text style={styles.sectionArrow}>→</Text>
+    </View>
+  );
+}
+
+function CollectionCard({ title }: { title: string }) {
+  return (
+    <Pressable style={styles.collection}>
+      <Text style={styles.collectionTitle}>{title}</Text>
+      <Text style={styles.collectionArrow}>→</Text>
+    </Pressable>
+  );
+}
+
+function ProductCard({
+  name,
+  price,
+}: {
+  name: string;
+  price: string;
+}) {
+  return (
+    <Pressable style={styles.product}>
+      <View style={styles.productImage}>
+        <Text style={styles.placeholder}>STAYUNKNOWN</Text>
+
+        <View style={styles.productHeart}>
+          <Text style={styles.heart}>♡</Text>
+        </View>
+      </View>
+
+      <Text style={styles.productName}>{name}</Text>
+      <Text style={styles.productPrice}>{price}</Text>
+    </Pressable>
+  );
+}
+
+function AccountRow({ title }: { title: string }) {
+  return (
+    <Pressable style={styles.accountRow}>
+      <Text style={styles.accountRowText}>{title}</Text>
+      <Text style={styles.accountArrow}>→</Text>
+    </Pressable>
+  );
+}
+
+function NavItem({
+  label,
+  active,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable onPress={onPress} style={styles.navItem}>
+      <Text style={active ? styles.navActive : styles.navText}>
+        {label}
+      </Text>
+    </Pressable>
   );
 }
 
@@ -159,16 +324,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
   },
 
+  main: {
+    flex: 1,
+  },
+
   content: {
-    paddingBottom: 100,
+    paddingBottom: 35,
   },
 
   header: {
     paddingHorizontal: 20,
     paddingVertical: 18,
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
+    alignItems: 'center',
   },
 
   logo: {
@@ -180,65 +349,80 @@ const styles = StyleSheet.create({
 
   headerActions: {
     flexDirection: 'row',
-    alignItems: 'center',
     gap: 18,
   },
 
-  icon: {
+  headerIcon: {
     color: '#fff',
-    fontSize: 23,
+    fontSize: 22,
   },
 
   hero: {
-    minHeight: 440,
+    minHeight: 430,
     marginHorizontal: 16,
     padding: 24,
     backgroundColor: '#181818',
     justifyContent: 'flex-end',
   },
 
-  kicker: {
+  heroKicker: {
     color: '#999',
     fontSize: 11,
     fontWeight: '700',
     letterSpacing: 2,
-    marginBottom: 12,
+    marginBottom: 10,
   },
 
   heroTitle: {
     color: '#fff',
-    fontSize: 42,
+    fontSize: 40,
+    lineHeight: 45,
     fontWeight: '900',
     letterSpacing: 1,
   },
 
   heroDescription: {
-    color: '#bbb',
+    color: '#aaa',
     fontSize: 15,
     lineHeight: 22,
-    marginTop: 10,
+    marginTop: 12,
     marginBottom: 24,
-    maxWidth: 300,
+    maxWidth: 320,
   },
 
-  primaryButton: {
+  whiteButton: {
     backgroundColor: '#fff',
-    alignSelf: 'flex-start',
-    paddingHorizontal: 22,
+    paddingHorizontal: 20,
     paddingVertical: 15,
+    alignSelf: 'flex-start',
   },
 
-  primaryButtonText: {
+  blackButtonText: {
     color: '#000',
-    fontSize: 12,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+
+  outlineButton: {
+    borderWidth: 1,
+    borderColor: '#fff',
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    alignSelf: 'flex-start',
+  },
+
+  whiteButtonText: {
+    color: '#fff',
+    fontSize: 11,
     fontWeight: '800',
     letterSpacing: 1,
   },
 
   sectionHeader: {
-    marginTop: 34,
-    marginBottom: 16,
     paddingHorizontal: 20,
+    marginTop: 32,
+    marginBottom: 15,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -246,16 +430,43 @@ const styles = StyleSheet.create({
 
   sectionTitle: {
     color: '#fff',
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: '800',
     letterSpacing: 1.2,
   },
 
-  viewAll: {
-    color: '#888',
+  sectionArrow: {
+    color: '#777',
+    fontSize: 18,
+  },
+
+  featureCard: {
+    marginHorizontal: 16,
+    minHeight: 250,
+    padding: 22,
+    backgroundColor: '#151515',
+    justifyContent: 'flex-end',
+  },
+
+  featureLabel: {
+    color: '#777',
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: '800',
+    letterSpacing: 2,
+    marginBottom: 8,
+  },
+
+  featureTitle: {
+    color: '#fff',
+    fontSize: 32,
+    fontWeight: '900',
     letterSpacing: 1,
+  },
+
+  featureSubtitle: {
+    color: '#999',
+    marginTop: 6,
+    marginBottom: 20,
   },
 
   horizontal: {
@@ -263,9 +474,16 @@ const styles = StyleSheet.create({
     gap: 10,
   },
 
+  collectionGrid: {
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+
   collection: {
-    width: 160,
-    height: 190,
+    width: 155,
+    height: 175,
     backgroundColor: '#171717',
     padding: 15,
     justifyContent: 'space-between',
@@ -273,108 +491,210 @@ const styles = StyleSheet.create({
 
   collectionTitle: {
     color: '#fff',
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '800',
     letterSpacing: 1,
   },
 
   collectionArrow: {
     color: '#fff',
-    fontSize: 22,
+    fontSize: 20,
   },
 
   productGrid: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     paddingHorizontal: 12,
   },
 
   product: {
     width: '50%',
     paddingHorizontal: 8,
+    marginBottom: 22,
   },
 
   productImage: {
-    height: 230,
+    height: 220,
     backgroundColor: '#181818',
     justifyContent: 'center',
     alignItems: 'center',
     position: 'relative',
   },
 
-  imagePlaceholder: {
+  placeholder: {
     color: '#555',
     fontSize: 9,
     fontWeight: '800',
     letterSpacing: 1.5,
   },
 
-  wishlist: {
+  productHeart: {
     position: 'absolute',
-    top: 12,
-    right: 12,
+    top: 10,
+    right: 10,
   },
 
   heart: {
     color: '#fff',
-    fontSize: 23,
+    fontSize: 22,
   },
 
   productName: {
     color: '#fff',
     fontSize: 12,
     fontWeight: '700',
-    marginTop: 10,
+    marginTop: 9,
   },
 
   productPrice: {
-    color: '#999',
+    color: '#888',
     fontSize: 12,
-    marginTop: 5,
+    marginTop: 4,
   },
 
   statement: {
     paddingHorizontal: 24,
-    paddingTop: 70,
-    paddingBottom: 30,
+    paddingVertical: 65,
     alignItems: 'center',
   },
 
   statementTitle: {
     color: '#fff',
-    fontSize: 26,
+    fontSize: 25,
     fontWeight: '900',
     letterSpacing: 1,
     textAlign: 'center',
   },
 
   statementText: {
-    color: '#888',
+    color: '#777',
     fontSize: 14,
     lineHeight: 22,
     textAlign: 'center',
-    marginTop: 14,
-    maxWidth: 320,
+    marginTop: 12,
+    maxWidth: 330,
+  },
+
+  pageHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 22,
+    paddingBottom: 20,
+  },
+
+  pageTitle: {
+    color: '#fff',
+    fontSize: 28,
+    fontWeight: '900',
+    letterSpacing: 1,
+  },
+
+  searchBox: {
+    marginHorizontal: 20,
+    height: 52,
+    borderWidth: 1,
+    borderColor: '#292929',
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+
+  searchText: {
+    color: '#666',
+    fontSize: 14,
+  },
+
+  searchIcon: {
+    color: '#fff',
+    fontSize: 22,
+  },
+
+  emptyScreen: {
+    flex: 1,
+    paddingHorizontal: 24,
+    justifyContent: 'center',
+  },
+
+  largeTitle: {
+    color: '#fff',
+    fontSize: 32,
+    fontWeight: '900',
+    letterSpacing: 1,
+  },
+
+  emptyText: {
+    color: '#888',
+    fontSize: 15,
+    marginTop: 10,
+    marginBottom: 25,
+  },
+
+  accountIntro: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+
+  accountTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+
+  accountSubtitle: {
+    color: '#777',
+    marginTop: 6,
+    lineHeight: 21,
+  },
+
+  accountRow: {
+    marginHorizontal: 20,
+    paddingVertical: 19,
+    borderBottomWidth: 1,
+    borderBottomColor: '#1e1e1e',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+
+  accountRowText: {
+    color: '#fff',
+    fontSize: 14,
+  },
+
+  accountArrow: {
+    color: '#666',
+  },
+
+  accountActions: {
+    paddingHorizontal: 20,
+    paddingTop: 30,
+    gap: 12,
   },
 
   bottomNav: {
-    height: 72,
+    height: 70,
     backgroundColor: '#050505',
     borderTopWidth: 1,
-    borderTopColor: '#222',
+    borderTopColor: '#202020',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-around',
   },
 
-  activeNav: {
+  navItem: {
+    minWidth: 55,
+    alignItems: 'center',
+  },
+
+  navActive: {
     color: '#fff',
     fontSize: 9,
-    fontWeight: '800',
+    fontWeight: '900',
     letterSpacing: 1,
   },
 
-  nav: {
-    color: '#777',
+  navText: {
+    color: '#666',
     fontSize: 9,
     fontWeight: '700',
     letterSpacing: 1,
