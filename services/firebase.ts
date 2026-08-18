@@ -3,7 +3,6 @@ import { initializeApp } from 'firebase/app';
 import {
   getAuth,
   initializeAuth,
-  getReactNativePersistence,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
@@ -18,18 +17,20 @@ const firebaseConfig = {
   projectId: 'stayunknown-auth',
   storageBucket: 'stayunknown-auth.firebasestorage.app',
   messagingSenderId: '453624121758',
-  appId: '1:453624121758:web:79f2f96bc46b0fdfc4ae8f',
+  appId: '1:453624121758:web:79f2f96bc416b0fdfc4ae8f',
 };
 
 const app = initializeApp(firebaseConfig);
 
-export const auth = Platform.OS === 'web'
-  ? getAuth(app)
-  : initializeAuth(app, {
-      persistence: getReactNativePersistence(AsyncStorage),
-    });
+let auth;
 
-export { onAuthStateChanged };
+if (Platform.OS === 'web') {
+  auth = getAuth(app);
+} else {
+  auth = initializeAuth(app);
+}
+
+export { auth, onAuthStateChanged };
 export type { User };
 
 export async function createAccount(email: string, password: string) {
@@ -42,4 +43,9 @@ export async function login(email: string, password: string) {
 
 export async function logout() {
   return signOut(auth);
+}
+
+export async function getStoredAuthUser(): Promise<User | null> {
+  const stored = await AsyncStorage.getItem('stayunknown_auth_user');
+  return stored ? (JSON.parse(stored) as User) : null;
 }
