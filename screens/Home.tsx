@@ -30,7 +30,13 @@ import {
   onAuthStateChanged,
   User,
 } from 'firebase/auth';
-type Tab = 'home' | 'shop' | 'wishlist' | 'bag' | 'account';
+type Tab =
+  | 'home'
+  | 'shop'
+  | 'wishlist'
+  | 'bag'
+  | 'account'
+  | 'admin-products';
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>('home');
@@ -356,7 +362,18 @@ if (tab === 'admin-products') {
           <AccountRow title="Socials" />
           <AccountRow title="Contact" />
           <AccountRow title="Terms & Privacy" />
+          <Pressable
+  style={styles.accountRow}
+  onPress={() => setTab('admin-products')}
+>
+  <Text style={styles.accountRowText}>
+    ADMIN
+  </Text>
 
+  <Text style={styles.accountArrow}>
+    →
+  </Text>
+</Pressable>
           <View style={styles.accountActions}>
             <Pressable
               style={styles.whiteButton}
