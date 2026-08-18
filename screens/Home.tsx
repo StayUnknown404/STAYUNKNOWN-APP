@@ -122,18 +122,19 @@ export default function Home() {
       setAuthMessage('');
     } catch (error) {
       console.error('Logout error:', error);
-    }
+       }
   }
+
+  function handleWishlistToggle(product: Product) {
+    const updatedWishlist = toggleWishlist(product);
+    setWishlist([...updatedWishlist]);
+  }
+
   const availableProducts = products.filter(
-    function handleWishlistToggle(product: Product) {
-  const updatedWishlist = toggleWishlist(product);
-  setWishlist([...updatedWishlist]);
-}
     product => !product.comingSoon
   );
 
   const openProduct = (product: Product) => {
-    setSelectedProduct(product);
     setShowBag(false);
   };
 
