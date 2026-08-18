@@ -5,6 +5,7 @@ export type Product = {
   name: string;
   category?: string;
   price: number;
+  image?: string;
   sizes: string[];
   colors: string[];
   comingSoon?: boolean;
