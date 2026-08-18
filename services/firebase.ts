@@ -3,15 +3,13 @@ import { initializeApp } from 'firebase/app';
 import {
   getAuth,
   initializeAuth,
-  getReactNativePersistence,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   type User,
+  type Auth,
 } from 'firebase/auth';
-
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyB39u1-5EbGimA--fZa_-FApAavayzjlBU',
@@ -24,32 +22,28 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 
-let auth: ReturnType<typeof getAuth>;
+export const auth: Auth =
+  Platform.OS === 'web'
+    ? getAuth(app)
+    : initializeAuth(app);
 
-if (Platform.OS === 'web') {
-  auth = getAuth(app);
-} else {
-  auth = initializeAuth(app, {
-    persistence: getReactNativePersistence(AsyncStorage),
-  });
-}
-
-export { auth, onAuthStateChanged };
+export { onAuthStateChanged };
 export type { User };
 
-export async function createAccount(email: string, password: string) {
+export async function createAccount(
+  email: string,
+  password: string
+) {
   return createUserWithEmailAndPassword(auth, email, password);
 }
 
-export async function login(email: string, password: string) {
+export async function login(
+  email: string,
+  password: string
+) {
   return signInWithEmailAndPassword(auth, email, password);
 }
 
 export async function logout() {
   return signOut(auth);
-}
-
-export async function getStoredAuthUser(): Promise<User | null> {
-  const stored = await AsyncStorage.getItem('stayunknown_auth_user');
-  return stored ? (JSON.parse(stored) as User) : null;
 }
