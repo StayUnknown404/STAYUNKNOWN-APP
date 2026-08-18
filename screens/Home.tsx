@@ -8,6 +8,7 @@ import {
   Pressable,
   ActivityIndicator,
   Image,
+  TextInput,
 } from 'react-native';
 import { getCatalog, Product } from '../services/api';
 import ProductDetails from './ProductDetails';
