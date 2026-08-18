@@ -6,6 +6,7 @@ import {
   Text,
   View,
   Pressable,
+  Image
 } from 'react-native';
 import { Product } from '../services/api';
 import {
@@ -86,10 +87,18 @@ export default function ProductDetails({
         </View>
 
         <View style={styles.image}>
-          <Text style={styles.placeholder}>
-            STAYUNKNOWN
-          </Text>
-        </View>
+  {product.image ? (
+    <Image
+      source={{ uri: product.image }}
+      style={styles.imageActual}
+      resizeMode="cover"
+    />
+  ) : (
+    <Text style={styles.placeholder}>
+      STAYUNKNOWN
+    </Text>
+  )}
+</View>
 
         <View style={styles.details}>
           <Text style={styles.collection}>
@@ -254,7 +263,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
+  imageActual: {
+  width: '100%',
+  height: '100%',
+  },
   placeholder: {
     color: '#555',
     fontSize: 10,
