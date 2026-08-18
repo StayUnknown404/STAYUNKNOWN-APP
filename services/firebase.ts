@@ -3,6 +3,7 @@ import { initializeApp } from 'firebase/app';
 import {
   getAuth,
   initializeAuth,
+  getReactNativePersistence,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
@@ -27,7 +28,9 @@ let auth;
 if (Platform.OS === 'web') {
   auth = getAuth(app);
 } else {
-  auth = initializeAuth(app);
+  auth = initializeAuth(app, {
+    persistence: getReactNativePersistence(AsyncStorage),
+  });
 }
 
 export { auth, onAuthStateChanged };
