@@ -28,7 +28,12 @@ type Tab = 'home' | 'shop' | 'wishlist' | 'bag' | 'account';
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>('home');
-
+    const [user, setUser] = useState<User | null>(null);
+  const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authMessage, setAuthMessage] = useState('');
+  const [authLoading, setAuthLoading] = useState(false);
   const [selectedProduct, setSelectedProduct] =
     useState<Product | null>(null);
 
