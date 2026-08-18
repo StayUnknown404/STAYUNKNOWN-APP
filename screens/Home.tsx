@@ -11,14 +11,17 @@ import {
 import { getCatalog, Product } from '../services/api';
 import ProductDetails from './ProductDetails';
 import Bag from './Bag';
+
 type Tab = 'home' | 'shop' | 'wishlist' | 'bag' | 'account';
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>('home');
+
   const [selectedProduct, setSelectedProduct] =
-  useState<Product | null>(null);
+    useState<Product | null>(null);
 
   const [showBag, setShowBag] = useState(false);
+
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -46,12 +49,25 @@ export default function Home() {
     product => !product.comingSoon
   );
 
+  const openProduct = (product: Product) => {
+    setSelectedProduct(product);
+    setShowBag(false);
+  };
+
+  const openBag = () => {
+    setSelectedProduct(null);
+    setShowBag(true);
+    setTab('bag');
+  };
+
   const renderProducts = (items: Product[]) => {
     if (loading) {
       return (
         <View style={styles.loadingBox}>
           <ActivityIndicator color="#fff" />
-          <Text style={styles.loadingText}>LOADING PRODUCTS</Text>
+          <Text style={styles.loadingText}>
+            LOADING PRODUCTS
+          </Text>
         </View>
       );
     }
@@ -61,8 +77,13 @@ export default function Home() {
         <View style={styles.loadingBox}>
           <Text style={styles.errorText}>{error}</Text>
 
-          <Pressable style={styles.outlineButton} onPress={loadProducts}>
-            <Text style={styles.whiteButtonText}>TRY AGAIN</Text>
+          <Pressable
+            style={styles.outlineButton}
+            onPress={loadProducts}
+          >
+            <Text style={styles.whiteButtonText}>
+              TRY AGAIN
+            </Text>
           </Pressable>
         </View>
       );
@@ -81,35 +102,36 @@ export default function Home() {
     return (
       <View style={styles.productGrid}>
         {items.map(product => (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard
+            key={product.id}
+            product={product}
+            onPress={() => openProduct(product)}
+          />
         ))}
       </View>
-      
     );
   };
 
-  const renderContent = () => { 
+  const renderContent = () => {
     if (selectedProduct) {
-  return (
-    <ProductDetails
-      product={selectedProduct}
-      onBack={() => setSelectedProduct(null)}
-      onBag={() => {
-        setSelectedProduct(null);
-        setShowBag(true);
-      }}
-    />
-  );
-}
+      return (
+        <ProductDetails
+          product={selectedProduct}
+          onBack={() => setSelectedProduct(null)}
+          onBag={openBag}
+        />
+      );
+    }
 
-if (showBag) {
-  return (
-    <Bag
-      onBack={() => setShowBag(false)}
-      onCheckout={() => {}}
-    />
-  );
-}
+    if (showBag) {
+      return (
+        <Bag
+          onBack={() => setShowBag(false)}
+          onCheckout={() => {}}
+        />
+      );
+    }
+
     if (tab === 'shop') {
       return (
         <ScrollView
@@ -119,7 +141,10 @@ if (showBag) {
           <PageHeader title="SHOP" />
 
           <View style={styles.searchBox}>
-            <Text style={styles.searchText}>Search products</Text>
+            <Text style={styles.searchText}>
+              Search products
+            </Text>
+
             <Text style={styles.searchIcon}>⌕</Text>
           </View>
 
@@ -144,7 +169,9 @@ if (showBag) {
     if (tab === 'wishlist') {
       return (
         <View style={styles.emptyScreen}>
-          <Text style={styles.largeTitle}>WISHLIST</Text>
+          <Text style={styles.largeTitle}>
+            WISHLIST
+          </Text>
 
           <Text style={styles.emptyText}>
             Save pieces you want to come back to.
@@ -154,7 +181,9 @@ if (showBag) {
             style={styles.whiteButton}
             onPress={() => setTab('shop')}
           >
-            <Text style={styles.blackButtonText}>EXPLORE SHOP</Text>
+            <Text style={styles.blackButtonText}>
+              EXPLORE SHOP
+            </Text>
           </Pressable>
         </View>
       );
@@ -162,20 +191,10 @@ if (showBag) {
 
     if (tab === 'bag') {
       return (
-        <View style={styles.emptyScreen}>
-          <Text style={styles.largeTitle}>YOUR BAG</Text>
-
-          <Text style={styles.emptyText}>
-            Your bag is empty.
-          </Text>
-
-          <Pressable
-            style={styles.whiteButton}
-            onPress={() => setTab('shop')}
-          >
-            <Text style={styles.blackButtonText}>START SHOPPING</Text>
-          </Pressable>
-        </View>
+        <Bag
+          onBack={() => setShowBag(false)}
+          onCheckout={() => {}}
+        />
       );
     }
 
@@ -188,7 +207,9 @@ if (showBag) {
           <PageHeader title="ACCOUNT" />
 
           <View style={styles.accountIntro}>
-            <Text style={styles.accountTitle}>STAYUNKNOWN</Text>
+            <Text style={styles.accountTitle}>
+              STAYUNKNOWN
+            </Text>
 
             <Text style={styles.accountSubtitle}>
               Your account, orders and preferences.
@@ -227,25 +248,31 @@ if (showBag) {
         contentContainerStyle={styles.content}
       >
         <View style={styles.header}>
-          <Text style={styles.logo}>STAYUNKNOWN</Text>
+          <Text style={styles.logo}>
+            STAYUNKNOWN
+          </Text>
 
           <View style={styles.headerActions}>
             <Text style={styles.headerIcon}>⌕</Text>
             <Text style={styles.headerIcon}>♡</Text>
-            <Text style={styles.headerIcon}>▢</Text>
+            <Pressable onPress={openBag}>
+              <Text style={styles.headerIcon}>▢</Text>
+            </Pressable>
           </View>
         </View>
 
         <View style={styles.hero}>
-          <Text style={styles.heroKicker}>STAYUNKNOWN</Text>
+          <Text style={styles.heroKicker}>
+            STAYUNKNOWN
+          </Text>
 
           <Text style={styles.heroTitle}>
             MOVE IN SILENCE.
           </Text>
 
           <Text style={styles.heroDescription}>
-            New pieces. Limited drops. Built for those who don't
-            need to be seen.
+            New pieces. Limited drops. Built for those who
+            don't need to be seen.
           </Text>
 
           <Pressable
@@ -261,9 +288,13 @@ if (showBag) {
         <SectionTitle title="LATEST DROP" />
 
         <View style={styles.featureCard}>
-          <Text style={styles.featureLabel}>NEW</Text>
+          <Text style={styles.featureLabel}>
+            NEW
+          </Text>
 
-          <Text style={styles.featureTitle}>UNKNOWN</Text>
+          <Text style={styles.featureTitle}>
+            UNKNOWN
+          </Text>
 
           <Text style={styles.featureSubtitle}>
             The latest STAYUNKNOWN pieces.
@@ -304,8 +335,8 @@ if (showBag) {
           </Text>
 
           <Text style={styles.statementText}>
-            STAYUNKNOWN is an independent streetwear brand from
-            Lagos, available worldwide.
+            STAYUNKNOWN is an independent streetwear brand
+            from Lagos, available worldwide.
           </Text>
         </View>
       </ScrollView>
@@ -318,40 +349,39 @@ if (showBag) {
         {renderContent()}
       </View>
 
-      <View style={styles.bottomNav}>
-        <NavItem
-          label="HOME"
-          active={tab === 'home'}
-          onPress={() => setTab('home')}
-        />
+      {!selectedProduct && !showBag && (
+        <View style={styles.bottomNav}>
+          <NavItem
+            label="HOME"
+            active={tab === 'home'}
+            onPress={() => setTab('home')}
+          />
 
-        <NavItem
-          label="SHOP"
-          active={tab === 'shop'}
-          onPress={() => setTab('shop')}
-        />
+          <NavItem
+            label="SHOP"
+            active={tab === 'shop'}
+            onPress={() => setTab('shop')}
+          />
 
-        <NavItem
-          label="♡"
-          active={tab === 'wishlist'}
-          onPress={() => setTab('wishlist')}
-        />
+          <NavItem
+            label="♡"
+            active={tab === 'wishlist'}
+            onPress={() => setTab('wishlist')}
+          />
 
-        <NavItem
-  label="BAG"
-  active={tab === 'bag'}
-  onPress={() => {
-    setTab('bag');
-    setShowBag(true);
-  }}
-/>
+          <NavItem
+            label="BAG"
+            active={tab === 'bag'}
+            onPress={openBag}
+          />
 
-        <NavItem
-          label="ACCOUNT"
-          active={tab === 'account'}
-          onPress={() => setTab('account')}
-        />
-      </View>
+          <NavItem
+            label="ACCOUNT"
+            active={tab === 'account'}
+            onPress={() => setTab('account')}
+          />
+        </View>
+      )}
     </SafeAreaView>
   );
 }
@@ -378,7 +408,10 @@ function PageHeader({ title }: { title: string }) {
 function SectionTitle({ title }: { title: string }) {
   return (
     <View style={styles.sectionHeader}>
-      <Text style={styles.sectionTitle}>{title}</Text>
+      <Text style={styles.sectionTitle}>
+        {title}
+      </Text>
+
       <Text style={styles.sectionArrow}>→</Text>
     </View>
   );
@@ -387,13 +420,24 @@ function SectionTitle({ title }: { title: string }) {
 function CollectionCard({ title }: { title: string }) {
   return (
     <Pressable style={styles.collection}>
-      <Text style={styles.collectionTitle}>{title}</Text>
-      <Text style={styles.collectionArrow}>→</Text>
+      <Text style={styles.collectionTitle}>
+        {title}
+      </Text>
+
+      <Text style={styles.collectionArrow}>
+        →
+      </Text>
     </Pressable>
   );
 }
 
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({
+  product,
+  onPress,
+}: {
+  product: Product;
+  onPress: () => void;
+}) {
   const isLowStock =
     typeof product.stock === 'number' &&
     typeof product.lowStockThreshold === 'number' &&
@@ -402,9 +446,9 @@ function ProductCard({ product }: { product: Product }) {
 
   return (
     <Pressable
-  style={styles.product}
-  onPress={() => setSelectedProduct(product)}
->
+      style={styles.product}
+      onPress={onPress}
+    >
       <View style={styles.productImage}>
         <Text style={styles.placeholder}>
           STAYUNKNOWN
@@ -455,7 +499,9 @@ function AccountRow({ title }: { title: string }) {
         {title}
       </Text>
 
-      <Text style={styles.accountArrow}>→</Text>
+      <Text style={styles.accountArrow}>
+        →
+      </Text>
     </Pressable>
   );
 }
@@ -828,18 +874,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  largeTitle: {
-    color: '#fff',
-    fontSize: 32,
-    fontWeight: '900',
-    letterSpacing: 1,
-  },
-
   emptyText: {
     color: '#888',
     fontSize: 15,
     marginTop: 10,
     marginBottom: 25,
+  },
+
+  largeTitle: {
+    color: '#fff',
+    fontSize: 32,
+    fontWeight: '900',
+    letterSpacing: 1,
   },
 
   accountIntro: {
