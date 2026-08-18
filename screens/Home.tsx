@@ -17,6 +17,7 @@ import {
   toggleWishlist,
 } from '../services/store';
 import ProductDetails from './ProductDetails';
+import AdminProducts from './AdminProducts';
 import Bag from './Bag';
 import {
   createAccount,
@@ -320,7 +321,13 @@ export default function Home() {
         />
       );
     }
-
+if (tab === 'admin-products') {
+  return (
+    <AdminProducts
+      onBack={() => setTab('account')}
+    />
+  );
+}
     if (tab === 'account') {
   return (
     <ScrollView
