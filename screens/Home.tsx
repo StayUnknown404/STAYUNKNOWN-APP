@@ -185,7 +185,7 @@ export default function Home() {
     return (
       <View style={styles.productGrid}>
         {items.map(product => (
-          <<ProductCard
+          <ProductCard
   key={product.id}
   product={product}
   onPress={() => setSelectedProduct(product)}
