@@ -42,7 +42,13 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, currentUser => {
+      setUser(currentUser);
+    });
 
+    return unsubscribe;
+  }, []);
   useEffect(() => {
     loadProducts();
   }, []);
