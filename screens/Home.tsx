@@ -185,10 +185,14 @@ export default function Home() {
     return (
       <View style={styles.productGrid}>
         {items.map(product => (
-          <ProductCard
+          <<ProductCard
   key={product.id}
   product={product}
   onPress={() => setSelectedProduct(product)}
+  onWishlist={() => handleWishlistToggle(product)}
+  wishlisted={wishlist.some(
+    item => item.id === product.id
+  )}
 />
         ))}
       </View>
