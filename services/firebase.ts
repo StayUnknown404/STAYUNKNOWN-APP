@@ -3,13 +3,13 @@ import { initializeApp } from 'firebase/app';
 import {
   getAuth,
   initializeAuth,
-  getReactNativePersistence,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
   type User,
 } from 'firebase/auth';
+import { getReactNativePersistence } from 'firebase/auth/react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const firebaseConfig = {
