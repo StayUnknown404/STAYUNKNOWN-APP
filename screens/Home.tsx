@@ -450,9 +450,17 @@ function ProductCard({
       onPress={onPress}
     >
       <View style={styles.productImage}>
-        <Text style={styles.placeholder}>
-          STAYUNKNOWN
-        </Text>
+  {product.image ? (
+    <Image
+      source={{ uri: product.image }}
+      style={styles.productImageActual}
+      resizeMode="cover"
+    />
+  ) : (
+    <Text style={styles.placeholder}>
+      STAYUNKNOWN
+    </Text>
+  )}
 
         <View style={styles.productHeart}>
           <Text style={styles.heart}>♡</Text>
