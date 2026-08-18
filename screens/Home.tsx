@@ -67,7 +67,55 @@ export default function Home() {
       setLoading(false);
     }
   }
+  async function handleAuth() {
+    if (!authEmail.trim() || !authPassword) {
+      setAuthMessage('Enter your email and password.');
+      return;
+    }
 
+    try {
+      setAuthLoading(true);
+      setAuthMessage('');
+
+      if (authMode === 'signup') {
+        await createAccount(
+          authEmail.trim(),
+          authPassword
+        );
+
+        setAuthMessage('Account created successfully.');
+      } else {
+        await login(
+          authEmail.trim(),
+          authPassword
+        );
+
+        setAuthMessage('Welcome back.');
+      }
+
+      setAuthPassword('');
+    } catch (error: any) {
+      console.error('Authentication error:', error);
+
+      setAuthMessage(
+        error?.message?.includes('auth/invalid-credential')
+          ? 'Email or password is incorrect.'
+          : error?.message ||
+            'Unable to complete authentication.'
+      );
+    } finally {
+      setAuthLoading(false);
+    }
+  }
+
+  async function handleLogout() {
+    try {
+      await logout();
+      setAuthMessage('');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  }
   const availableProducts = products.filter(
     product => !product.comingSoon
   );
