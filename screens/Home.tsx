@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -6,12 +6,81 @@ import {
   Text,
   View,
   Pressable,
+  ActivityIndicator,
 } from 'react-native';
+import { getCatalog, Product } from '../services/api';
 
 type Tab = 'home' | 'shop' | 'wishlist' | 'bag' | 'account';
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>('home');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    loadProducts();
+  }, []);
+
+  async function loadProducts() {
+    try {
+      setLoading(true);
+      setError('');
+
+      const catalog = await getCatalog();
+      setProducts(catalog);
+    } catch (err) {
+      console.error('Catalog loading error:', err);
+      setError('Unable to load products right now.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const availableProducts = products.filter(
+    product => !product.comingSoon
+  );
+
+  const renderProducts = (items: Product[]) => {
+    if (loading) {
+      return (
+        <View style={styles.loadingBox}>
+          <ActivityIndicator color="#fff" />
+          <Text style={styles.loadingText}>LOADING PRODUCTS</Text>
+        </View>
+      );
+    }
+
+    if (error) {
+      return (
+        <View style={styles.loadingBox}>
+          <Text style={styles.errorText}>{error}</Text>
+
+          <Pressable style={styles.outlineButton} onPress={loadProducts}>
+            <Text style={styles.whiteButtonText}>TRY AGAIN</Text>
+          </Pressable>
+        </View>
+      );
+    }
+
+    if (items.length === 0) {
+      return (
+        <View style={styles.loadingBox}>
+          <Text style={styles.emptyText}>
+            No products available right now.
+          </Text>
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.productGrid}>
+        {items.map(product => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </View>
+    );
+  };
 
   const renderContent = () => {
     if (tab === 'shop') {
@@ -30,20 +99,17 @@ export default function Home() {
           <SectionTitle title="COLLECTIONS" />
 
           <View style={styles.collectionGrid}>
-            <CollectionCard title="NEW DROP" />
-            <CollectionCard title="ESSENTIALS" />
-            <CollectionCard title="TEES" />
-            <CollectionCard title="HOODIES" />
+            {getCollections(products).map(collection => (
+              <CollectionCard
+                key={collection}
+                title={collection}
+              />
+            ))}
           </View>
 
           <SectionTitle title="ALL PRODUCTS" />
 
-          <View style={styles.productGrid}>
-            <ProductCard name="UNKNOWN TEE" price="₦45,000" />
-            <ProductCard name="SILENCE HOODIE" price="₦85,000" />
-            <ProductCard name="TRACK PANTS" price="₦70,000" />
-            <ProductCard name="UNKNOWN CAP" price="₦35,000" />
-          </View>
+          {renderProducts(availableProducts)}
         </ScrollView>
       );
     }
@@ -52,9 +118,11 @@ export default function Home() {
       return (
         <View style={styles.emptyScreen}>
           <Text style={styles.largeTitle}>WISHLIST</Text>
+
           <Text style={styles.emptyText}>
             Save pieces you want to come back to.
           </Text>
+
           <Pressable
             style={styles.whiteButton}
             onPress={() => setTab('shop')}
@@ -69,9 +137,11 @@ export default function Home() {
       return (
         <View style={styles.emptyScreen}>
           <Text style={styles.largeTitle}>YOUR BAG</Text>
+
           <Text style={styles.emptyText}>
             Your bag is empty.
           </Text>
+
           <Pressable
             style={styles.whiteButton}
             onPress={() => setTab('shop')}
@@ -92,6 +162,7 @@ export default function Home() {
 
           <View style={styles.accountIntro}>
             <Text style={styles.accountTitle}>STAYUNKNOWN</Text>
+
             <Text style={styles.accountSubtitle}>
               Your account, orders and preferences.
             </Text>
@@ -141,18 +212,22 @@ export default function Home() {
         <View style={styles.hero}>
           <Text style={styles.heroKicker}>STAYUNKNOWN</Text>
 
-          <Text style={styles.heroTitle}>MOVE IN SILENCE.</Text>
+          <Text style={styles.heroTitle}>
+            MOVE IN SILENCE.
+          </Text>
 
           <Text style={styles.heroDescription}>
-            New pieces. Limited drops. Built for those who don't need to be
-            seen.
+            New pieces. Limited drops. Built for those who don't
+            need to be seen.
           </Text>
 
           <Pressable
             style={styles.whiteButton}
             onPress={() => setTab('shop')}
           >
-            <Text style={styles.blackButtonText}>SHOP THE DROP</Text>
+            <Text style={styles.blackButtonText}>
+              SHOP THE DROP
+            </Text>
           </Pressable>
         </View>
 
@@ -160,7 +235,9 @@ export default function Home() {
 
         <View style={styles.featureCard}>
           <Text style={styles.featureLabel}>NEW</Text>
+
           <Text style={styles.featureTitle}>UNKNOWN</Text>
+
           <Text style={styles.featureSubtitle}>
             The latest STAYUNKNOWN pieces.
           </Text>
@@ -169,7 +246,9 @@ export default function Home() {
             style={styles.outlineButton}
             onPress={() => setTab('shop')}
           >
-            <Text style={styles.whiteButtonText}>VIEW DROP</Text>
+            <Text style={styles.whiteButtonText}>
+              VIEW DROP
+            </Text>
           </Pressable>
         </View>
 
@@ -180,23 +259,26 @@ export default function Home() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.horizontal}
         >
-          <CollectionCard title="NEW DROP" />
-          <CollectionCard title="ESSENTIALS" />
-          <CollectionCard title="LIMITED" />
+          {getCollections(products).map(collection => (
+            <CollectionCard
+              key={collection}
+              title={collection}
+            />
+          ))}
         </ScrollView>
 
         <SectionTitle title="BEST SELLERS" />
 
-        <View style={styles.productGrid}>
-          <ProductCard name="UNKNOWN TEE" price="₦45,000" />
-          <ProductCard name="SILENCE HOODIE" price="₦85,000" />
-        </View>
+        {renderProducts(availableProducts.slice(0, 4))}
 
         <View style={styles.statement}>
-          <Text style={styles.statementTitle}>MOVE IN SILENCE.</Text>
+          <Text style={styles.statementTitle}>
+            MOVE IN SILENCE.
+          </Text>
+
           <Text style={styles.statementText}>
-            STAYUNKNOWN is an independent streetwear brand from Lagos,
-            available worldwide.
+            STAYUNKNOWN is an independent streetwear brand from
+            Lagos, available worldwide.
           </Text>
         </View>
       </ScrollView>
@@ -205,7 +287,9 @@ export default function Home() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.main}>{renderContent()}</View>
+      <View style={styles.main}>
+        {renderContent()}
+      </View>
 
       <View style={styles.bottomNav}>
         <NavItem
@@ -242,6 +326,17 @@ export default function Home() {
   );
 }
 
+function getCollections(products: Product[]) {
+  const collections = products
+    .map(product => product.collection)
+    .filter(
+      (collection): collection is string =>
+        Boolean(collection)
+    );
+
+  return Array.from(new Set(collections));
+}
+
 function PageHeader({ title }: { title: string }) {
   return (
     <View style={styles.pageHeader}>
@@ -268,25 +363,54 @@ function CollectionCard({ title }: { title: string }) {
   );
 }
 
-function ProductCard({
-  name,
-  price,
-}: {
-  name: string;
-  price: string;
-}) {
+function ProductCard({ product }: { product: Product }) {
+  const isLowStock =
+    typeof product.stock === 'number' &&
+    typeof product.lowStockThreshold === 'number' &&
+    product.stock > 0 &&
+    product.stock <= product.lowStockThreshold;
+
   return (
     <Pressable style={styles.product}>
       <View style={styles.productImage}>
-        <Text style={styles.placeholder}>STAYUNKNOWN</Text>
+        <Text style={styles.placeholder}>
+          STAYUNKNOWN
+        </Text>
 
         <View style={styles.productHeart}>
           <Text style={styles.heart}>♡</Text>
         </View>
+
+        {isLowStock && (
+          <View style={styles.stockBadge}>
+            <Text style={styles.stockText}>
+              LOW STOCK
+            </Text>
+          </View>
+        )}
+
+        {product.stock === 0 && (
+          <View style={styles.stockBadge}>
+            <Text style={styles.stockText}>
+              SOLD OUT
+            </Text>
+          </View>
+        )}
       </View>
 
-      <Text style={styles.productName}>{name}</Text>
-      <Text style={styles.productPrice}>{price}</Text>
+      <Text style={styles.productName}>
+        {product.name}
+      </Text>
+
+      <Text style={styles.productPrice}>
+        ₦{product.price.toLocaleString('en-NG')}
+      </Text>
+
+      {product.colors?.length > 0 && (
+        <Text style={styles.productMeta}>
+          {product.colors.length} colours
+        </Text>
+      )}
     </Pressable>
   );
 }
@@ -294,7 +418,10 @@ function ProductCard({
 function AccountRow({ title }: { title: string }) {
   return (
     <Pressable style={styles.accountRow}>
-      <Text style={styles.accountRowText}>{title}</Text>
+      <Text style={styles.accountRowText}>
+        {title}
+      </Text>
+
       <Text style={styles.accountArrow}>→</Text>
     </Pressable>
   );
@@ -310,8 +437,17 @@ function NavItem({
   onPress: () => void;
 }) {
   return (
-    <Pressable onPress={onPress} style={styles.navItem}>
-      <Text style={active ? styles.navActive : styles.navText}>
+    <Pressable
+      onPress={onPress}
+      style={styles.navItem}
+    >
+      <Text
+        style={
+          active
+            ? styles.navActive
+            : styles.navText
+        }
+      >
         {label}
       </Text>
     </Pressable>
@@ -539,6 +675,22 @@ const styles = StyleSheet.create({
     fontSize: 22,
   },
 
+  stockBadge: {
+    position: 'absolute',
+    bottom: 10,
+    left: 10,
+    backgroundColor: '#fff',
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+  },
+
+  stockText: {
+    color: '#000',
+    fontSize: 8,
+    fontWeight: '900',
+    letterSpacing: 0.8,
+  },
+
   productName: {
     color: '#fff',
     fontSize: 12,
@@ -549,6 +701,12 @@ const styles = StyleSheet.create({
   productPrice: {
     color: '#888',
     fontSize: 12,
+    marginTop: 4,
+  },
+
+  productMeta: {
+    color: '#555',
+    fontSize: 10,
     marginTop: 4,
   },
 
@@ -607,6 +765,28 @@ const styles = StyleSheet.create({
   searchIcon: {
     color: '#fff',
     fontSize: 22,
+  },
+
+  loadingBox: {
+    minHeight: 160,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+
+  loadingText: {
+    color: '#777',
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1,
+    marginTop: 12,
+  },
+
+  errorText: {
+    color: '#aaa',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 15,
   },
 
   emptyScreen: {
