@@ -103,10 +103,10 @@ export default function Home() {
       <View style={styles.productGrid}>
         {items.map(product => (
           <ProductCard
-            key={product.id}
-            product={product}
-            onPress={() => openProduct(product)}
-          />
+  key={product.id}
+  product={product}
+  onPress={() => setSelectedProduct(product)}
+/>
         ))}
       </View>
     );
