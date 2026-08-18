@@ -11,6 +11,11 @@ import {
   TextInput,
 } from 'react-native';
 import { getCatalog, Product } from '../services/api';
+import {
+  getWishlist,
+  isWishlisted,
+  toggleWishlist,
+} from '../services/store';
 import ProductDetails from './ProductDetails';
 import Bag from './Bag';
 import {
@@ -29,6 +34,9 @@ type Tab = 'home' | 'shop' | 'wishlist' | 'bag' | 'account';
 export default function Home() {
   const [tab, setTab] = useState<Tab>('home');
     const [user, setUser] = useState<User | null>(null);
+  const [wishlist, setWishlist] = useState<Product[]>(
+  getWishlist()
+);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
@@ -117,6 +125,10 @@ export default function Home() {
     }
   }
   const availableProducts = products.filter(
+    function handleWishlistToggle(product: Product) {
+  const updatedWishlist = toggleWishlist(product);
+  setWishlist([...updatedWishlist]);
+}
     product => !product.comingSoon
   );
 
@@ -598,9 +610,13 @@ function CollectionCard({ title }: { title: string }) {
 function ProductCard({
   product,
   onPress,
+  onWishlist,
+  wishlisted,
 }: {
   product: Product;
   onPress: () => void;
+  onWishlist: () => void;
+  wishlisted: boolean;
 }) {
   const isLowStock =
     typeof product.stock === 'number' &&
@@ -626,10 +642,15 @@ function ProductCard({
     </Text>
   )}
 
-        <View style={styles.productHeart}>
-          <Text style={styles.heart}>♡</Text>
-        </View>
-
+        <Pressable
+  style={styles.productHeart}
+  onPress={onWishlist}
+  hitSlop={10}
+>
+  <Text style={styles.heart}>
+    {wishlisted ? '♥' : '♡'}
+  </Text>
+</Pressable>
         {isLowStock && (
           <View style={styles.stockBadge}>
             <Text style={styles.stockText}>
