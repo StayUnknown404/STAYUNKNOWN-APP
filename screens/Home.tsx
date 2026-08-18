@@ -13,7 +13,17 @@ import {
 import { getCatalog, Product } from '../services/api';
 import ProductDetails from './ProductDetails';
 import Bag from './Bag';
+import {
+  createAccount,
+  login,
+  logout,
+  auth,
+} from '../services/firebase';
 
+import {
+  onAuthStateChanged,
+  User,
+} from 'firebase/auth';
 type Tab = 'home' | 'shop' | 'wishlist' | 'bag' | 'account';
 
 export default function Home() {
