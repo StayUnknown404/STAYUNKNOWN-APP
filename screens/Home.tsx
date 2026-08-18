@@ -744,7 +744,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     position: 'relative',
   },
-
+  productImageActual: {
+  width: '100%',
+  height: '100%',
+  },
   placeholder: {
     color: '#555',
     fontSize: 9,
