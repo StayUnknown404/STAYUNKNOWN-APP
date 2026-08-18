@@ -30,7 +30,6 @@ import {
   onAuthStateChanged,
   User,
 } from 'firebase/auth';
-import { checkAdmin } from '../services/admin';
 type Tab =
   | 'home'
   | 'shop'
@@ -41,11 +40,10 @@ type Tab =
 
 export default function Home() {
   const [tab, setTab] = useState<Tab>('home');
-  const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+    const [user, setUser] = useState<User | null>(null);
   const [wishlist, setWishlist] = useState<Product[]>(
-    getWishlist()
-  );
+  getWishlist()
+);
   const [authMode, setAuthMode] = useState<'login' | 'signup'>('login');
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
@@ -66,31 +64,6 @@ export default function Home() {
 
     return unsubscribe;
   }, []);
-
-  useEffect(() => {
-    let mounted = true;
-    async function check() {
-      if (!user) {
-        if (mounted) setIsAdmin(false);
-        return;
-      }
-
-      try {
-        const res = await checkAdmin();
-        if (mounted) setIsAdmin(Boolean(res?.isAdmin));
-      } catch (err) {
-        console.warn('Admin check failed', err);
-        if (mounted) setIsAdmin(false);
-      }
-    }
-
-    check();
-
-    return () => {
-      mounted = false;
-    };
-  }, [user]);
-
   useEffect(() => {
     loadProducts();
   }, []);
@@ -156,7 +129,7 @@ export default function Home() {
       setAuthMessage('');
     } catch (error) {
       console.error('Logout error:', error);
-    }
+       }
   }
 
   function handleWishlistToggle(product: Product) {
@@ -221,14 +194,14 @@ export default function Home() {
       <View style={styles.productGrid}>
         {items.map(product => (
           <ProductCard
-            key={product.id}
-            product={product}
-            onPress={() => setSelectedProduct(product)}
-            onWishlist={() => handleWishlistToggle(product)}
-            wishlisted={wishlist.some(
-              item => item.id === product.id
-            )}
-          />
+  key={product.id}
+  product={product}
+  onPress={() => setSelectedProduct(product)}
+  onWishlist={() => handleWishlistToggle(product)}
+  wishlisted={wishlist.some(
+    item => item.id === product.id
+  )}
+/>
         ))}
       </View>
     );
@@ -289,62 +262,62 @@ export default function Home() {
     }
 
     if (tab === 'wishlist') {
-      return (
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.content}
-        >
-          <PageHeader title="WISHLIST" />
+  return (
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.content}
+    >
+      <PageHeader title="WISHLIST" />
 
-          {wishlist.length === 0 ? (
-            <View style={styles.emptyScreen}>
-              <Text style={styles.largeTitle}>
-                NOTHING SAVED
-              </Text>
+      {wishlist.length === 0 ? (
+        <View style={styles.emptyScreen}>
+          <Text style={styles.largeTitle}>
+            NOTHING SAVED
+          </Text>
 
-              <Text style={styles.emptyText}>
-                Save pieces you want to come back to.
-              </Text>
+          <Text style={styles.emptyText}>
+            Save pieces you want to come back to.
+          </Text>
 
-              <Pressable
-                style={styles.whiteButton}
-                onPress={() => setTab('shop')}
-              >
-                <Text style={styles.blackButtonText}>
-                  EXPLORE SHOP
-                </Text>
-              </Pressable>
-            </View>
-          ) : (
-            <>
-              <Text style={styles.wishlistCount}>
-                {wishlist.length}{' '}
-                {wishlist.length === 1
-                  ? 'ITEM'
-                  : 'ITEMS'}{' '}
-                SAVED
-              </Text>
+          <Pressable
+            style={styles.whiteButton}
+            onPress={() => setTab('shop')}
+          >
+            <Text style={styles.blackButtonText}>
+              EXPLORE SHOP
+            </Text>
+          </Pressable>
+        </View>
+      ) : (
+        <>
+          <Text style={styles.wishlistCount}>
+            {wishlist.length}{' '}
+            {wishlist.length === 1
+              ? 'ITEM'
+              : 'ITEMS'}{' '}
+            SAVED
+          </Text>
 
-              <View style={styles.productGrid}>
-                {wishlist.map(product => (
-                  <ProductCard
-                    key={product.id}
-                    product={product}
-                    onPress={() =>
-                      setSelectedProduct(product)
-                    }
-                    onWishlist={() =>
-                      handleWishlistToggle(product)
-                    }
-                    wishlisted={true}
-                  />
-                ))}
-              </View>
-            </>
-          )}
-        </ScrollView>
-      );
-    }
+          <View style={styles.productGrid}>
+            {wishlist.map(product => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                onPress={() =>
+                  setSelectedProduct(product)
+                }
+                onWishlist={() =>
+                  handleWishlistToggle(product)
+                }
+                wishlisted={true}
+              />
+            ))}
+          </View>
+        </>
+      )}
+    </ScrollView>
+  );
+}
 
     if (tab === 'bag') {
       return (
@@ -354,158 +327,160 @@ export default function Home() {
         />
       );
     }
-    if (tab === 'admin-products') {
-      return (
-        <AdminProducts
-          onBack={() => setTab('account')}
-        />
-      );
-    }
+if (tab === 'admin-products') {
+  return (
+    <AdminProducts
+      onBack={() => setTab('account')}
+    />
+  );
+}
     if (tab === 'account') {
-      return (
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.content}
-        >
-          <PageHeader title="ACCOUNT" />
+  return (
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.content}
+    >
+      <PageHeader title="ACCOUNT" />
 
-          {user ? (
-            <>
-              <View style={styles.accountIntro}>
-                <Text style={styles.accountTitle}>
-                  WELCOME
-                </Text>
+      {user ? (
+        <>
+          <View style={styles.accountIntro}>
+            <Text style={styles.accountTitle}>
+              WELCOME
+            </Text>
 
-                <Text style={styles.accountSubtitle}>
-                  {user.email}
-                </Text>
-              </View>
+            <Text style={styles.accountSubtitle}>
+              {user.email}
+            </Text>
+          </View>
 
-              <AccountRow title="My Orders" />
-              <AccountRow title="Notifications" />
-              <AccountRow title="Profile" />
-              <AccountRow title="Help & Support" />
-              <AccountRow title="About STAYUNKNOWN" />
-              <AccountRow title="Socials" />
-              <AccountRow title="Contact" />
-              <AccountRow title="Terms & Privacy" />
-              {isAdmin && (
-                <Pressable
-                  style={styles.accountRow}
-                  onPress={() => setTab('admin-products')}
-                >
-                  <Text style={styles.accountRowText}>ADMIN</Text>
+          <AccountRow title="My Orders" />
+          <AccountRow title="Notifications" />
+          <AccountRow title="Profile" />
+          <AccountRow title="Help & Support" />
+          <AccountRow title="About STAYUNKNOWN" />
+          <AccountRow title="Socials" />
+          <AccountRow title="Contact" />
+          <AccountRow title="Terms & Privacy" />
+          <Pressable
+  style={styles.accountRow}
+  onPress={() => setTab('admin-products')}
+>
+  <Text style={styles.accountRowText}>
+    ADMIN
+  </Text>
 
-                  <Text style={styles.accountArrow}>→</Text>
-                </Pressable>
-              )}
-              <View style={styles.accountActions}>
-                <Pressable
-                  style={styles.whiteButton}
-                  onPress={handleLogout}
-                >
-                  <Text style={styles.blackButtonText}>
-                    LOG OUT
-                  </Text>
-                </Pressable>
-              </View>
-            </>
-          ) : (
-            <>
-              <View style={styles.accountIntro}>
-                <Text style={styles.accountTitle}>
-                  STAYUNKNOWN
-                </Text>
+  <Text style={styles.accountArrow}>
+    →
+  </Text>
+</Pressable>
+          <View style={styles.accountActions}>
+            <Pressable
+              style={styles.whiteButton}
+              onPress={handleLogout}
+            >
+              <Text style={styles.blackButtonText}>
+                LOG OUT
+              </Text>
+            </Pressable>
+          </View>
+        </>
+      ) : (
+        <>
+          <View style={styles.accountIntro}>
+            <Text style={styles.accountTitle}>
+              STAYUNKNOWN
+            </Text>
 
-                <Text style={styles.accountSubtitle}>
+            <Text style={styles.accountSubtitle}>
+              {authMode === 'login'
+                ? 'Sign in to your account.'
+                : 'Create your STAYUNKNOWN account.'}
+            </Text>
+          </View>
+
+          <View style={styles.authBox}>
+            <Text style={styles.authLabel}>
+              EMAIL
+            </Text>
+
+            <TextInput
+              style={styles.authInput}
+              value={authEmail}
+              onChangeText={setAuthEmail}
+              placeholder="you@example.com"
+              placeholderTextColor="#555"
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+
+            <Text style={styles.authLabel}>
+              PASSWORD
+            </Text>
+
+            <TextInput
+              style={styles.authInput}
+              value={authPassword}
+              onChangeText={setAuthPassword}
+              placeholder="Password"
+              placeholderTextColor="#555"
+              secureTextEntry
+            />
+
+            {authMessage ? (
+              <Text style={styles.authMessage}>
+                {authMessage}
+              </Text>
+            ) : null}
+
+            <Pressable
+              style={styles.whiteButton}
+              onPress={handleAuth}
+              disabled={authLoading}
+            >
+              {authLoading ? (
+                <ActivityIndicator color="#000" />
+              ) : (
+                <Text style={styles.blackButtonText}>
                   {authMode === 'login'
-                    ? 'Sign in to your account.'
-                    : 'Create your STAYUNKNOWN account.'}
+                    ? 'SIGN IN'
+                    : 'CREATE ACCOUNT'}
                 </Text>
-              </View>
+              )}
+            </Pressable>
 
-              <View style={styles.authBox}>
-                <Text style={styles.authLabel}>
-                  EMAIL
-                </Text>
+            <Pressable
+              style={styles.authSwitch}
+              onPress={() => {
+                setAuthMode(
+                  authMode === 'login'
+                    ? 'signup'
+                    : 'login'
+                );
+                setAuthMessage('');
+              }}
+            >
+              <Text style={styles.authSwitchText}>
+                {authMode === 'login'
+                  ? 'CREATE A NEW ACCOUNT'
+                  : 'ALREADY HAVE AN ACCOUNT? SIGN IN'}
+              </Text>
+            </Pressable>
 
-                <TextInput
-                  style={styles.authInput}
-                  value={authEmail}
-                  onChangeText={setAuthEmail}
-                  placeholder="you@example.com"
-                  placeholderTextColor="#555"
-                  autoCapitalize="none"
-                  keyboardType="email-address"
-                />
-
-                <Text style={styles.authLabel}>
-                  PASSWORD
-                </Text>
-
-                <TextInput
-                  style={styles.authInput}
-                  value={authPassword}
-                  onChangeText={setAuthPassword}
-                  placeholder="Password"
-                  placeholderTextColor="#555"
-                  secureTextEntry
-                />
-
-                {authMessage ? (
-                  <Text style={styles.authMessage}>
-                    {authMessage}
-                  </Text>
-                ) : null}
-
-                <Pressable
-                  style={styles.whiteButton}
-                  onPress={handleAuth}
-                  disabled={authLoading}
-                >
-                  {authLoading ? (
-                    <ActivityIndicator color="#000" />
-                  ) : (
-                    <Text style={styles.blackButtonText}>
-                      {authMode === 'login'
-                        ? 'SIGN IN'
-                        : 'CREATE ACCOUNT'}
-                    </Text>
-                  )}
-                </Pressable>
-
-                <Pressable
-                  style={styles.authSwitch}
-                  onPress={() => {
-                    setAuthMode(
-                      authMode === 'login'
-                        ? 'signup'
-                        : 'login'
-                    );
-                    setAuthMessage('');
-                  }}
-                >
-                  <Text style={styles.authSwitchText}>
-                    {authMode === 'login'
-                      ? 'CREATE A NEW ACCOUNT'
-                      : 'ALREADY HAVE AN ACCOUNT? SIGN IN'}
-                  </Text>
-                </Pressable>
-
-                <Pressable
-                  style={styles.outlineButton}
-                  onPress={() => setTab('home')}
-                >
-                  <Text style={styles.whiteButtonText}>
-                    CONTINUE AS GUEST
-                  </Text>
-                </Pressable>
-              </View>
-            </>
-          )}
-        </ScrollView>
-      );
-    }
+            <Pressable
+              style={styles.outlineButton}
+              onPress={() => setTab('home')}
+            >
+              <Text style={styles.whiteButtonText}>
+                CONTINUE AS GUEST
+              </Text>
+            </Pressable>
+          </View>
+        </>
+      )}
+    </ScrollView>
+  );
+}
 
     return (
       <ScrollView
@@ -774,15 +749,42 @@ function AccountRow({ title }: { title: string }) {
   );
 }
 
+function NavItem({
+  label,
+  active,
+  onPress,
+}: {
+  label: string;
+  active: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={styles.navItem}
+    >
+      <Text
+        style={
+          active
+            ? styles.navActive
+            : styles.navText
+        }
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   wishlistCount: {
-    color: '#666',
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 1,
-    paddingHorizontal: 20,
-    marginBottom: 10,
-  },
+  color: '#666',
+  fontSize: 10,
+  fontWeight: '800',
+  letterSpacing: 1,
+  paddingHorizontal: 20,
+  marginBottom: 10,
+},
   container: {
     flex: 1,
     backgroundColor: '#000',
@@ -985,3 +987,273 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
 
+  productImageActual: {
+  width: '100%',
+  height: '100%',
+  },
+  placeholder: {
+    color: '#555',
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 1.5,
+  },
+
+  productHeart: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+  },
+
+  heart: {
+    color: '#fff',
+    fontSize: 22,
+  },
+
+  stockBadge: {
+    position: 'absolute',
+    bottom: 10,
+    left: 10,
+    backgroundColor: '#fff',
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+  },
+
+  stockText: {
+    color: '#000',
+    fontSize: 8,
+    fontWeight: '900',
+    letterSpacing: 0.8,
+  },
+
+  productName: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: '700',
+    marginTop: 9,
+  },
+
+  productPrice: {
+    color: '#888',
+    fontSize: 12,
+    marginTop: 4,
+  },
+
+  productMeta: {
+    color: '#555',
+    fontSize: 10,
+    marginTop: 4,
+  },
+
+  statement: {
+    paddingHorizontal: 24,
+    paddingVertical: 65,
+    alignItems: 'center',
+  },
+
+  statementTitle: {
+    color: '#fff',
+    fontSize: 25,
+    fontWeight: '900',
+    letterSpacing: 1,
+    textAlign: 'center',
+  },
+
+  statementText: {
+    color: '#777',
+    fontSize: 14,
+    lineHeight: 22,
+    textAlign: 'center',
+    marginTop: 12,
+    maxWidth: 330,
+  },
+
+  pageHeader: {
+    paddingHorizontal: 20,
+    paddingTop: 22,
+    paddingBottom: 20,
+  },
+
+  pageTitle: {
+    color: '#fff',
+    fontSize: 28,
+    fontWeight: '900',
+    letterSpacing: 1,
+  },
+
+  searchBox: {
+    marginHorizontal: 20,
+    height: 52,
+    borderWidth: 1,
+    borderColor: '#292929',
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+
+  searchText: {
+    color: '#666',
+    fontSize: 14,
+  },
+
+  searchIcon: {
+    color: '#fff',
+    fontSize: 22,
+  },
+
+  loadingBox: {
+    minHeight: 160,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+
+  loadingText: {
+    color: '#777',
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 1,
+    marginTop: 12,
+  },
+
+  errorText: {
+    color: '#aaa',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 15,
+  },
+
+  emptyScreen: {
+    flex: 1,
+    paddingHorizontal: 24,
+    justifyContent: 'center',
+  },
+
+  emptyText: {
+    color: '#888',
+    fontSize: 15,
+    marginTop: 10,
+    marginBottom: 25,
+  },
+
+  largeTitle: {
+    color: '#fff',
+    fontSize: 32,
+    fontWeight: '900',
+    letterSpacing: 1,
+  },
+
+  accountIntro: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+  },
+
+  accountTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: 1,
+  },
+
+  accountSubtitle: {
+    color: '#777',
+    marginTop: 6,
+    lineHeight: 21,
+  },
+
+  accountRow: {
+    marginHorizontal: 20,
+    paddingVertical: 19,
+    borderBottomWidth: 1,
+    borderBottomColor: '#1e1e1e',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+
+  accountRowText: {
+    color: '#fff',
+    fontSize: 14,
+  },
+
+  accountArrow: {
+    color: '#666',
+  },
+
+  accountActions: {
+    paddingHorizontal: 20,
+    paddingTop: 30,
+    gap: 12,
+  },
+  authBox: {
+    paddingHorizontal: 20,
+    paddingTop: 10,
+  },
+
+  authLabel: {
+    color: '#777',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1,
+    marginTop: 18,
+    marginBottom: 8,
+  },
+
+  authInput: {
+    height: 52,
+    borderWidth: 1,
+    borderColor: '#292929',
+    color: '#fff',
+    paddingHorizontal: 15,
+    fontSize: 14,
+    backgroundColor: '#080808',
+  },
+
+  authMessage: {
+    color: '#aaa',
+    fontSize: 12,
+    lineHeight: 18,
+    marginTop: 15,
+    marginBottom: 10,
+  },
+
+  authSwitch: {
+    paddingVertical: 18,
+    alignItems: 'center',
+  },
+
+  authSwitchText: {
+    color: '#777',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 1,
+    textAlign: 'center',
+  },
+  bottomNav: {
+    height: 70,
+    backgroundColor: '#050505',
+    borderTopWidth: 1,
+    borderTopColor: '#202020',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+
+  navItem: {
+    minWidth: 55,
+    alignItems: 'center',
+  },
+
+  navActive: {
+    color: '#fff',
+    fontSize: 9,
+    fontWeight: '900',
+    letterSpacing: 1,
+  },
+
+  navText: {
+    color: '#666',
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 1,
+  },
+});
