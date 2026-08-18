@@ -200,20 +200,22 @@ export default function Home() {
     }
 
     if (tab === 'account') {
-      return (
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.content}
-        >
-          <PageHeader title="ACCOUNT" />
+  return (
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={styles.content}
+    >
+      <PageHeader title="ACCOUNT" />
 
+      {user ? (
+        <>
           <View style={styles.accountIntro}>
             <Text style={styles.accountTitle}>
-              STAYUNKNOWN
+              WELCOME
             </Text>
 
             <Text style={styles.accountSubtitle}>
-              Your account, orders and preferences.
+              {user.email}
             </Text>
           </View>
 
@@ -227,21 +229,112 @@ export default function Home() {
           <AccountRow title="Terms & Privacy" />
 
           <View style={styles.accountActions}>
-            <Pressable style={styles.whiteButton}>
+            <Pressable
+              style={styles.whiteButton}
+              onPress={handleLogout}
+            >
               <Text style={styles.blackButtonText}>
-                SIGN IN / CREATE ACCOUNT
+                LOG OUT
+              </Text>
+            </Pressable>
+          </View>
+        </>
+      ) : (
+        <>
+          <View style={styles.accountIntro}>
+            <Text style={styles.accountTitle}>
+              STAYUNKNOWN
+            </Text>
+
+            <Text style={styles.accountSubtitle}>
+              {authMode === 'login'
+                ? 'Sign in to your account.'
+                : 'Create your STAYUNKNOWN account.'}
+            </Text>
+          </View>
+
+          <View style={styles.authBox}>
+            <Text style={styles.authLabel}>
+              EMAIL
+            </Text>
+
+            <TextInput
+              style={styles.authInput}
+              value={authEmail}
+              onChangeText={setAuthEmail}
+              placeholder="you@example.com"
+              placeholderTextColor="#555"
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+
+            <Text style={styles.authLabel}>
+              PASSWORD
+            </Text>
+
+            <TextInput
+              style={styles.authInput}
+              value={authPassword}
+              onChangeText={setAuthPassword}
+              placeholder="Password"
+              placeholderTextColor="#555"
+              secureTextEntry
+            />
+
+            {authMessage ? (
+              <Text style={styles.authMessage}>
+                {authMessage}
+              </Text>
+            ) : null}
+
+            <Pressable
+              style={styles.whiteButton}
+              onPress={handleAuth}
+              disabled={authLoading}
+            >
+              {authLoading ? (
+                <ActivityIndicator color="#000" />
+              ) : (
+                <Text style={styles.blackButtonText}>
+                  {authMode === 'login'
+                    ? 'SIGN IN'
+                    : 'CREATE ACCOUNT'}
+                </Text>
+              )}
+            </Pressable>
+
+            <Pressable
+              style={styles.authSwitch}
+              onPress={() => {
+                setAuthMode(
+                  authMode === 'login'
+                    ? 'signup'
+                    : 'login'
+                );
+                setAuthMessage('');
+              }}
+            >
+              <Text style={styles.authSwitchText}>
+                {authMode === 'login'
+                  ? 'CREATE A NEW ACCOUNT'
+                  : 'ALREADY HAVE AN ACCOUNT? SIGN IN'}
               </Text>
             </Pressable>
 
-            <Pressable style={styles.outlineButton}>
+            <Pressable
+              style={styles.outlineButton}
+              onPress={() => setTab('home')}
+            >
               <Text style={styles.whiteButtonText}>
                 CONTINUE AS GUEST
               </Text>
             </Pressable>
           </View>
-        </ScrollView>
-      );
-    }
+        </>
+      )}
+    </ScrollView>
+  );
+}
 
     return (
       <ScrollView
