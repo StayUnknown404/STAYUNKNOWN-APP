@@ -31,7 +31,7 @@ export default function Home(){
  const available=useMemo(()=>products.filter(p=>!p.hidden&&!p.comingSoon),[products]);
  const searchable=useMemo(()=>products.filter(p=>!p.hidden),[products]);
  const filtered=useMemo(()=>{const q=search.trim().toLowerCase();if(!q)return available;return available.filter(p=>[p.name,p.category,p.collection,p.tags].join(' ').toLowerCase().includes(q));},[available,search]);
- if(view.type==='product')return <ProductDetails product={view.product} onBack={()=>{if(view.product.from==='search'){setView({type:'search'});}else if(view.product.from==='collections'){setView({type:'collections'});}else{setView({type:'root'});setTab(view.product.from);}}} onBag={openBag} onWishlistChanged={()=>setWishlist([...getWishlist()])}/>;
+ if(view.type==='product')return <ProductDetails product={view.product} onBack={()=>{if(view.from==='search'){setView({type:'search'});}else if(view.from==='collections'){setView({type:'collections'});}else{setView({type:'root'});setTab(view.from);}}} onBag={openBag} onWishlistChanged={()=>setWishlist([...getWishlist()])}/>;
  if(view.type==='search')return <SearchPage products={searchable} wishlist={wishlist} onBack={()=>setView({type:'root'})} onProduct={p=>setView({type:'product',product:p,from:'search'})} onWishlist={changeWishlist}/>;
  if(view.type==='collections')return <CollectionsScreen onBack={()=>setView({type:'root'})} onProduct={p=>setView({type:'product',product:p,from:'collections'})}/>;
  if(view.type==='notifications')return <Notifications onBack={()=>setView({type:'root'})}/>;
