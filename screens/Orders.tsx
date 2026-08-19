@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Linking, Pressable, RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { getOrderHistory, getOrder, Order } from '../services/api';
 
 const STATUSES = ['ALL','PENDING','PAID','PROCESSING','PACKED','SHIPPED','DELIVERED','FAILED'];
@@ -24,7 +24,7 @@ function OrderDetails({order,onBack}:{order:Order;onBack:()=>void}){const s=Stri
   <Pressable onPress={onBack}><Text style={styles.back}>← ORDERS</Text></Pressable><Text style={styles.big}>{order.orderNumber||order.id}</Text><Text style={styles.meta}>{order.email||order.customer?.email||''}</Text>
   <View style={styles.timeline}>{steps.map((x,i)=><View key={x} style={styles.step}><View style={[styles.dot,i<=current&&styles.dotActive]}/><View><Text style={[styles.stepTitle,i<=current&&styles.activeText]}>{x}</Text>{i===current?<Text style={styles.current}>CURRENT STATUS</Text>:null}</View></View>)}</View>
   <Text style={styles.section}>ITEMS</Text>{(order.items||[]).map((i:any,n:number)=><View key={n} style={styles.item}><Text style={styles.itemName}>{i.name||i.productName||i.productId}</Text><Text style={styles.meta}>Qty {i.quantity||1} · {i.size||''} · {i.color||''}</Text></View>)}
-  <Text style={styles.section}>DELIVERY</Text><View style={styles.card}><Text style={styles.meta}>Courier</Text><Text style={styles.value}>{order.courier||'Not assigned'}</Text><Text style={styles.meta}>Tracking</Text>{(order.trackingNumber||order.tracking||order.trackingUrl)?<Text style={styles.link}>{order.trackingNumber||order.tracking||order.trackingUrl}</Text>:<Text style={styles.value}>Not available yet</Text>}<Text style={styles.meta}>Estimated delivery</Text><Text style={styles.value}>{order.estimatedDelivery||'—'}</Text><Text style={styles.meta}>Note</Text><Text style={styles.value}>{order.deliveryNote||order.deliveryNotes||order.note||'—'}</Text></View>
+  <Text style={styles.section}>DELIVERY</Text><View style={styles.card}><Text style={styles.meta}>Courier</Text><Text style={styles.value}>{order.courier||'Not assigned'}</Text><Text style={styles.meta}>Tracking</Text>{(order.trackingNumber||order.tracking||order.trackingUrl)?<Pressable onPress={()=>{const target=String(order.trackingUrl||order.trackingNumber||order.tracking||''); if(/^https?:\/\//i.test(target)) void Linking.openURL(target);}}><Text style={styles.link}>{order.trackingNumber||order.tracking||order.trackingUrl}</Text></Pressable>:<Text style={styles.value}>Not available yet</Text>}<Text style={styles.meta}>Estimated delivery</Text><Text style={styles.value}>{order.estimatedDelivery||'—'}</Text><Text style={styles.meta}>Note</Text><Text style={styles.value}>{order.deliveryNote||order.deliveryNotes||order.note||'—'}</Text></View>
   <Text style={styles.section}>TOTAL</Text><Text style={styles.total}>₦{Number(order.total||order.amount||0).toLocaleString('en-NG')}</Text>
  </ScrollView></SafeAreaView>}
 
