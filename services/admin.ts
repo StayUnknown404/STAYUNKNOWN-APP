@@ -21,8 +21,39 @@ async function adminRequest<T = any>(path: string, options: RequestInit = {}) {
   return data as T;
 }
 
-export async function checkAdmin() {
-  return adminRequest<{ ok: boolean; isAdmin: boolean; email: string }>('/api/admin/me');
+export type AdminRole = 'OWNER' | 'PRODUCT_MANAGER' | 'ORDER_MANAGER' | 'CUSTOMER_SUPPORT' | 'MARKETING';
+
+export type AdminSession = {
+  ok: boolean;
+  isAdmin: boolean;
+  email: string;
+  role?: AdminRole;
+  permissions?: string[];
+};
+
+export const ADMIN_PERMISSIONS: Record<AdminRole, string[]> = {
+  OWNER: ['products','inventory','collections','orders','restock','promos','support','notifications'],
+  PRODUCT_MANAGER: ['products','inventory','collections'],
+  ORDER_MANAGER: ['orders','restock'],
+  CUSTOMER_SUPPORT: ['support','orders'],
+  MARKETING: ['promos','collections','notifications'],
+};
+
+export async function checkAdmin(): Promise<AdminSession> {
+  const data = await adminRequest<AdminSession>('/api/admin/me');
+  if (!data.role) {
+    const tokenResult = await auth.currentUser?.getIdTokenResult();
+    const claimRole = tokenResult?.claims?.role || tokenResult?.claims?.adminRole;
+    if (typeof claimRole === 'string' && Object.prototype.hasOwnProperty.call(ADMIN_PERMISSIONS, claimRole)) {
+      data.role = claimRole as AdminRole;
+    }
+  }
+  if (!data.role && data.isAdmin) data.role = 'OWNER';
+  return data;
+}
+
+export function hasAdminPermission(role: AdminRole | undefined, area: string) {
+  return !!role && ADMIN_PERMISSIONS[role]?.includes(area);
 }
 
 export type AdminProductInput = {
