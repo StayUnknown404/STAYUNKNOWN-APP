@@ -136,3 +136,15 @@ export async function getAdminNotifications() {
 export async function markAdminNotificationRead(id: string) {
   return adminRequest(`/api/admin/notifications/${encodeURIComponent(id)}/read`, { method: 'PATCH' });
 }
+
+export async function createAdminNotification(payload: any) {
+  return adminRequest('/api/admin/notifications', { method: 'POST', body: JSON.stringify(payload) });
+}
+
+export async function updateAdminNotification(id: string, payload: any) {
+  return adminRequest(`/api/admin/notifications/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(payload) });
+}
+
+export async function deleteAdminNotification(id: string) {
+  return adminRequest(`/api/admin/notifications/${encodeURIComponent(id)}`, { method: 'DELETE' });
+}
