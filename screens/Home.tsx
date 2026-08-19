@@ -17,26 +17,26 @@ type Tab='home'|'shop'|'wishlist'|'bag'|'orders'|'account';
 type ViewMode={type:'root'}|{type:'product';product:Product}|{type:'collections'}|{type:'checkout'}|{type:'notifications'}|{type:'support'};
 
 export default function Home(){
- const [tab,setTab]=useState<Tab>('home');const [view,setView]=useState<ViewMode>({type:'root'});const [productBackView,setProductBackView]=useState<ViewMode>({type:'root'});const [products,setProducts]=useState<Product[]>([]);const [collections,setCollections]=useState<Collection[]>([]);const [wishlist,setWishlist]=useState<Product[]>(getWishlist());const [user,setUser]=useState<User|null>(auth.currentUser);const [loading,setLoading]=useState(true);const [refreshing,setRefreshing]=useState(false);const [error,setError]=useState('');const [search,setSearch]=useState('');const [admin,setAdmin]=useState(false);
+ const [tab,setTab]=useState<Tab>('home');const [view,setView]=useState<ViewMode>({type:'root'});const [products,setProducts]=useState<Product[]>([]);const [collections,setCollections]=useState<Collection[]>([]);const [wishlist,setWishlist]=useState<Product[]>(getWishlist());const [user,setUser]=useState<User|null>(auth.currentUser);const [loading,setLoading]=useState(true);const [refreshing,setRefreshing]=useState(false);const [error,setError]=useState('');const [search,setSearch]=useState('');const [admin,setAdmin]=useState(false);
  useEffect(()=>{void hydrateStore().then(()=>setWishlist([...getWishlist()]));const unsub=onAuthStateChanged(auth,async u=>{setUser(u);if(u){try{const ids=await getRemoteWishlistIds();setWishlist(replaceWishlistFromCatalog(ids,products));}catch{}}else setAdmin(false);});return()=>unsub();},[]);
  useEffect(()=>{void load();},[]);
  useEffect(()=>{if(user&&products.length){void getRemoteWishlistIds().then(ids=>setWishlist(replaceWishlistFromCatalog(ids,products))).catch(()=>{});}},[user,products.length]);
  async function load(){try{setLoading(true);setError('');const [p,c]=await Promise.all([getCatalog(),getCollections()]);setProducts(p);setCollections(c);setWishlist([...getWishlist()]);}catch(e:any){setError(e?.message||'Unable to load STAYUNKNOWN right now.');}finally{setLoading(false);setRefreshing(false);}}
  async function refresh(){setRefreshing(true);await load();}
  function changeWishlist(p:Product){const next=toggleWishlist(p);setWishlist([...next]);if(user)void saveRemoteWishlistIds(next.map(x=>x.id)).catch(()=>{});}
- function openProduct(p:Product){setProductBackView(view.type==='product'?{type:'root'}:view);setView({type:'product',product:p});}
+ function openProduct(p:Product){setView({type:'product',product:p});}
  function openBag(){setView({type:'root'});setTab('bag');}
  function openCheckout(){setView({type:'checkout'});}
  const available=useMemo(()=>products.filter(p=>!p.hidden&&!p.comingSoon),[products]);
  const filtered=useMemo(()=>{const q=search.trim().toLowerCase();if(!q)return available;return available.filter(p=>[p.name,p.category,p.collection,p.tags].join(' ').toLowerCase().includes(q));},[available,search]);
- if(view.type==='product')return <ProductDetails product={view.product} onBack={()=>setView(productBackView)} onBag={openBag} onWishlistChanged={()=>setWishlist([...getWishlist()])}/>;
+ if(view.type==='product')return <ProductDetails product={view.product} onBack={()=>setView({type:'root'})} onBag={openBag} onWishlistChanged={()=>setWishlist([...getWishlist()])}/>;
  if(view.type==='collections')return <CollectionsScreen onBack={()=>setView({type:'root'})} onProduct={openProduct}/>;
  if(view.type==='notifications')return <Notifications onBack={()=>setView({type:'root'})}/>;
  if(view.type==='support')return <Support onBack={()=>setView({type:'root'})}/>;
  if(view.type==='checkout')return <Checkout onBack={()=>setView({type:'root'})} onComplete={()=>{setView({type:'root'});setTab('home');void load();}}/>;
  if(tab==='bag')return <Bag onBack={()=>setTab('shop')} onCheckout={openCheckout}/>;
  if(tab==='orders')return <Orders/>;
- if(tab==='account')return <Account onShop={()=>setTab('shop')} onAdmin={()=>setTab('account-admin' as any)} onSupport={()=>setView({type:'support'})} onNotifications={()=>setView({type:'notifications'})}/>;
+ if(tab==='account')return <Account onShop={()=>setTab('shop')} onAdmin={()=>setTab('account-admin' as any)} onSupport={()=>setView({type:'support'})} onNotifications={()=>setView({type:'notifications'})} onOrders={()=>setTab('orders')} onWishlist={()=>setTab('wishlist')}/>;
  if((tab as any)==='account-admin')return <AdminDashboard onBack={()=>setTab('account')}/>;
  return <SafeAreaView style={styles.container}><ScrollView refreshControl={<RefreshControl refreshing={refreshing} onRefresh={refresh} tintColor="#fff"/>} showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
   <Header cart={getCartCount()} onBag={openBag} onSearch={()=>setTab('shop')} onWishlist={()=>setTab('wishlist')} onNotifications={()=>setView({type:'notifications'})}/>
