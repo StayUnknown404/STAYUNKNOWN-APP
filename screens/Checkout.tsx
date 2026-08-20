@@ -226,7 +226,7 @@ export default function Checkout({ onBack, onComplete }: Props) {
             <Text style={styles.promoText}>APPLY</Text>
           </Pressable>
         </View>
-        {promoMessage ? <Text style={styles.message}>{promoMessage}</Text> : null}
+        {promoMessage !== '' ? <Text style={styles.message}>{promoMessage}</Text> : null}
 
         <Text style={styles.heading}>ORDER SUMMARY</Text>
         <View style={styles.itemsCard}>
@@ -260,7 +260,7 @@ export default function Checkout({ onBack, onComplete }: Props) {
           </View>
         </View>
 
-        {statusMessage ? (
+        {statusMessage !== '' ? (
           <View style={[styles.statusBox, status === 'confirmed' && styles.statusSuccess]}>
             {busy ? <ActivityIndicator size="small" color="#fff" /> : null}
             <Text style={styles.status}>{statusMessage}</Text>
@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
   headerSpacer: { width: 45 },
   back: { color: '#fff', fontSize: 10, fontWeight: '900' },
   title: { color: '#fff', fontSize: 15, fontWeight: '900', letterSpacing: 1 },
-  stepRow: { flexDirection: 'row', gap: 18, borderBottomWidth: 1, borderBottomColor: '#222', paddingBottom: 14 },
+  stepRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#222', paddingBottom: 14 },
   stepActive: { color: '#fff', fontSize: 9, fontWeight: '900', letterSpacing: 1 },
   step: { color: '#555', fontSize: 9, fontWeight: '900', letterSpacing: 1 },
   heading: { color: '#fff', fontSize: 13, fontWeight: '900', letterSpacing: 1, marginTop: 25, marginBottom: 15 },
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
   totalRow: { marginTop: 8, paddingTop: 16, borderTopWidth: 1, borderTopColor: '#222' },
   totalLabel: { color: '#fff', fontSize: 13, fontWeight: '900' },
   totalValue: { color: '#fff', fontSize: 18, fontWeight: '900' },
-  statusBox: { marginTop: 20, padding: 12, backgroundColor: '#151515', borderWidth: 1, borderColor: '#292929', flexDirection: 'row', alignItems: 'center', gap: 9 },
+  statusBox: { marginTop: 20, padding: 12, backgroundColor: '#151515', borderWidth: 1, borderColor: '#292929', flexDirection: 'row', alignItems: 'center' },
   statusSuccess: { borderColor: '#fff' },
   status: { color: '#aaa', fontSize: 11, flex: 1 },
   pay: { backgroundColor: '#fff', paddingVertical: 18, alignItems: 'center', marginTop: 22 },
