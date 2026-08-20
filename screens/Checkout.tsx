@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
+  Animated,
+  Easing,
   Linking,
   Pressable,
   SafeAreaView,
@@ -41,6 +43,44 @@ export default function Checkout({ onBack, onComplete }: Props) {
   const [statusMessage, setStatusMessage] = useState('');
   const paymentStartedRef = useRef(false);
   const verifyingRef = useRef<string | null>(null);
+  const screenOpacity = useRef(new Animated.Value(0)).current;
+  const screenTranslateY = useRef(new Animated.Value(12)).current;
+  const payScale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(screenOpacity, {
+        toValue: 1,
+        duration: 260,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+      Animated.timing(screenTranslateY, {
+        toValue: 0,
+        duration: 320,
+        easing: Easing.out(Easing.cubic),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [screenOpacity, screenTranslateY]);
+
+  function pressPayIn() {
+    Animated.spring(payScale, {
+      toValue: 0.985,
+      friction: 7,
+      tension: 120,
+      useNativeDriver: true,
+    }).start();
+  }
+
+  function pressPayOut() {
+    Animated.spring(payScale, {
+      toValue: 1,
+      friction: 7,
+      tension: 120,
+      useNativeDriver: true,
+    }).start();
+  }
 
   const total = useMemo(() => Math.max(0, subtotal - discount), [subtotal, discount]);
   const itemCount = useMemo(() => cart.reduce((sum, item) => sum + item.quantity, 0), [cart]);
@@ -190,10 +230,16 @@ export default function Checkout({ onBack, onComplete }: Props) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <Animated.View
+        style={[
+          styles.screenMotion,
+          { opacity: screenOpacity, transform: [{ translateY: screenTranslateY }] },
+        ]}
+      >
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
           <Pressable onPress={onBack} hitSlop={10} disabled={busy}>
-            <Text style={styles.back}>← 404 BAG</Text>
+            <Text style={styles.back}>← BACK</Text>
           </Pressable>
           <Text style={styles.title}>CHECKOUT</Text>
           <View style={styles.headerSpacer} />
@@ -226,7 +272,7 @@ export default function Checkout({ onBack, onComplete }: Props) {
             <Text style={styles.promoText}>APPLY</Text>
           </Pressable>
         </View>
-        {promoMessage !== '' ? <Text style={styles.message}>{promoMessage}</Text> : null}
+        {promoMessage ? <Text style={styles.message}>{promoMessage}</Text> : null}
 
         <Text style={styles.heading}>ORDER SUMMARY</Text>
         <View style={styles.itemsCard}>
@@ -260,18 +306,27 @@ export default function Checkout({ onBack, onComplete }: Props) {
           </View>
         </View>
 
-        {statusMessage !== '' ? (
+        {statusMessage ? (
           <View style={[styles.statusBox, status === 'confirmed' && styles.statusSuccess]}>
             {busy ? <ActivityIndicator size="small" color="#fff" /> : null}
             <Text style={styles.status}>{statusMessage}</Text>
           </View>
         ) : null}
 
-        <Pressable style={[styles.pay, (busy || status === 'confirmed') && styles.payDisabled]} onPress={pay} disabled={busy || status === 'confirmed'}>
-          {busy ? <ActivityIndicator color="#000" /> : <Text style={styles.payText}>PAY ₦{total.toLocaleString('en-NG')} WITH PAYSTACK →</Text>}
-        </Pressable>
+        <Animated.View style={{ transform: [{ scale: payScale }] }}>
+          <Pressable
+            style={[styles.pay, (busy || status === 'confirmed') && styles.payDisabled]}
+            onPress={pay}
+            onPressIn={pressPayIn}
+            onPressOut={pressPayOut}
+            disabled={busy || status === 'confirmed'}
+          >
+            {busy ? <ActivityIndicator color="#000" /> : <Text style={styles.payText}>PAY ₦{total.toLocaleString('en-NG')} WITH PAYSTACK →</Text>}
+          </Pressable>
+        </Animated.View>
         <Text style={styles.security}>Payment is processed securely by Paystack. Your payment details are not stored by this app.</Text>
-      </ScrollView>
+        </ScrollView>
+      </Animated.View>
     </SafeAreaView>
   );
 }
@@ -303,12 +358,13 @@ function Field({ label, value, onChangeText, placeholder, multiline = false, key
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#000' },
+  screenMotion: { flex: 1 },
   content: { padding: 20, paddingBottom: 60 },
   header: { height: 55, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   headerSpacer: { width: 45 },
   back: { color: '#fff', fontSize: 10, fontWeight: '900' },
   title: { color: '#fff', fontSize: 15, fontWeight: '900', letterSpacing: 1 },
-  stepRow: { flexDirection: 'row', borderBottomWidth: 1, borderBottomColor: '#222', paddingBottom: 14 },
+  stepRow: { flexDirection: 'row', gap: 18, borderBottomWidth: 1, borderBottomColor: '#222', paddingBottom: 14 },
   stepActive: { color: '#fff', fontSize: 9, fontWeight: '900', letterSpacing: 1 },
   step: { color: '#555', fontSize: 9, fontWeight: '900', letterSpacing: 1 },
   heading: { color: '#fff', fontSize: 13, fontWeight: '900', letterSpacing: 1, marginTop: 25, marginBottom: 15 },
@@ -334,7 +390,7 @@ const styles = StyleSheet.create({
   totalRow: { marginTop: 8, paddingTop: 16, borderTopWidth: 1, borderTopColor: '#222' },
   totalLabel: { color: '#fff', fontSize: 13, fontWeight: '900' },
   totalValue: { color: '#fff', fontSize: 18, fontWeight: '900' },
-  statusBox: { marginTop: 20, padding: 12, backgroundColor: '#151515', borderWidth: 1, borderColor: '#292929', flexDirection: 'row', alignItems: 'center' },
+  statusBox: { marginTop: 20, padding: 12, backgroundColor: '#151515', borderWidth: 1, borderColor: '#292929', flexDirection: 'row', alignItems: 'center', gap: 9 },
   statusSuccess: { borderColor: '#fff' },
   status: { color: '#aaa', fontSize: 11, flex: 1 },
   pay: { backgroundColor: '#fff', paddingVertical: 18, alignItems: 'center', marginTop: 22 },
