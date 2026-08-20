@@ -19,7 +19,8 @@
           "cameraPermission": "STAYUNKNOWN needs camera access so you can take product images.",
           "microphonePermission": false
         }
-      ]
+      ],
+      "expo-notifications"
     ]
   }
 }
