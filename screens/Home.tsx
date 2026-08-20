@@ -73,12 +73,25 @@ function SearchPage({products,wishlist,onBack,onProduct,onWishlist}:{products:Pr
 }
 function HomeContent({loading,error,collections,products,onRetry,onProduct,onWishlist,wishlisted,onViewCollections,onShop}:{loading:boolean;error:string;collections:Collection[];products:Product[];onRetry:()=>void;onProduct:(p:Product)=>void;onWishlist:(p:Product)=>void;wishlisted:Product[];onViewCollections:()=>void;onShop:()=>void}){
  const featuredCollection=collections.find(c=>!c.hidden&&c.image);
- return <><View style={[styles.hero,featuredCollection?.image?styles.heroImageHero:null]}>
-  {featuredCollection?.image?<Image source={{uri:featuredCollection.image}} style={styles.heroBackground}/>:null}
-  <View style={featuredCollection?.image?styles.heroShade:null}><Text style={styles.kicker}>{featuredCollection?.image?'JUST DROPPED':'STAYUNKNOWN'}</Text><Text style={styles.heroTitle}>{featuredCollection?.name||'MOVE IN SILENCE.'}</Text><Text style={styles.heroCopy}>{featuredCollection?.description||'New pieces. Limited drops. Built for those who don't need to be seen.'}</Text><Pressable style={styles.white} onPress={onShop}><Text style={styles.black}>{featuredCollection?.image?'SHOP COLLECTION':'SHOP THE DROP'}</Text></Pressable></View></View>
-  <Section title="LATEST DROP"/><View style={styles.drop}><Text style={styles.dropKicker}>NEW DROP</Text><Text style={styles.dropTitle}>{products[0]?.name||'UNKNOWN'}</Text><Text style={styles.dropCopy}>The latest STAYUNKNOWN pieces.</Text><Pressable style={styles.outline} onPress={onShop}><Text style={styles.outlineText}>VIEW DROP →</Text></Pressable></View>
-  <Section title="COLLECTIONS" action="VIEW ALL" onAction={onViewCollections}/>{collections.length===0?<Text style={styles.muted}>NO COLLECTIONS YET.</Text>:<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontal}>{collections.map(c=><Pressable key={c.id} style={styles.collection} onPress={onViewCollections}>{c.image?<Image source={{uri:c.image}} style={styles.collectionImage}/>:<View style={styles.collectionImage}><Text style={styles.collectionFallback}>{c.name}</Text></View>}<Text style={styles.collectionName}>{c.name}</Text><Text style={styles.collectionCount}>{c.productCount||0} PIECES</Text></Pressable>)}</ScrollView>}
-  <Section title="BEST SELLERS" action="SHOP ALL" onAction={onShop}/>{loading?<Loader/>:error?<ErrorBox text={error} retry={onRetry}/>:<ProductGrid products={products.slice(0,4)} onProduct={onProduct} onWishlist={onWishlist} wishlisted={wishlisted}/>}<View style={styles.statement}><Text style={styles.statementTitle}>STAY UNKNOWN.</Text><Text style={styles.statementCopy}>Independent streetwear from Lagos. Available worldwide.</Text></View></>}
+ return (<>
+  <View style={[styles.hero,featuredCollection?.image?styles.heroImageHero:null]}>
+   {featuredCollection?.image?<Image source={{uri:featuredCollection.image}} style={styles.heroBackground}/>:null}
+   <View style={featuredCollection?.image?styles.heroShade:null}>
+    <Text style={styles.kicker}>{featuredCollection?.image?'JUST DROPPED':'STAYUNKNOWN'}</Text>
+    <Text style={styles.heroTitle}>{featuredCollection?.name||'MOVE IN SILENCE.'}</Text>
+    <Text style={styles.heroCopy}>{featuredCollection?.description||'New pieces. Limited drops. Built for those who do not need to be seen.'}</Text>
+    <Pressable style={styles.white} onPress={onShop}><Text style={styles.black}>{featuredCollection?.image?'SHOP COLLECTION':'SHOP THE DROP'}</Text></Pressable>
+   </View>
+  </View>
+  <Section title="LATEST DROP"/>
+  <View style={styles.drop}><Text style={styles.dropKicker}>NEW DROP</Text><Text style={styles.dropTitle}>{products[0]?.name||'UNKNOWN'}</Text><Text style={styles.dropCopy}>The latest STAYUNKNOWN pieces.</Text><Pressable style={styles.outline} onPress={onShop}><Text style={styles.outlineText}>VIEW DROP →</Text></Pressable></View>
+  <Section title="COLLECTIONS" action="VIEW ALL" onAction={onViewCollections}/>
+  {collections.length===0?<Text style={styles.muted}>NO COLLECTIONS YET.</Text>:<ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontal}>{collections.map(c=><Pressable key={c.id} style={styles.collection} onPress={onViewCollections}>{c.image?<Image source={{uri:c.image}} style={styles.collectionImage}/>:<View style={styles.collectionImage}><Text style={styles.collectionFallback}>{c.name}</Text></View>}<Text style={styles.collectionName}>{c.name}</Text><Text style={styles.collectionCount}>{c.productCount||0} PIECES</Text></Pressable>)}</ScrollView>}
+  <Section title="BEST SELLERS" action="SHOP ALL" onAction={onShop}/>
+  {loading?<Loader/>:error?<ErrorBox text={error} retry={onRetry}/>:<ProductGrid products={products.slice(0,4)} onProduct={onProduct} onWishlist={onWishlist} wishlisted={wishlisted}/>}
+  <View style={styles.statement}><Text style={styles.statementTitle}>STAY UNKNOWN.</Text><Text style={styles.statementCopy}>Independent streetwear from Lagos. Available worldwide.</Text></View>
+ </>);
+}
 function Shop({search,setSearch,collections,products,loading,error,onRetry,onProduct,onWishlist,wishlisted,onCollection}:{search:string;setSearch:(s:string)=>void;collections:Collection[];products:Product[];loading:boolean;error:string;onRetry:()=>void;onProduct:(p:Product)=>void;onWishlist:(p:Product)=>void;wishlisted:Product[];onCollection:()=>void}){
  const [category,setCategory]=useState('ALL'); const [maxPrice,setMaxPrice]=useState(''); const [sort,setSort]=useState('featured'); const [filters,setFilters]=useState(false); const [selectedCollection,setSelectedCollection]=useState('');
  const categoryMap=useMemo(()=>{const map=new Map<string,string>();products.forEach(p=>{const raw=typeof p.category==='string'?p.category.trim():'';if(raw){const key=raw.toLowerCase().replace(/\s+/g,' ');if(!map.has(key))map.set(key,raw);}});return map;},[products]);
