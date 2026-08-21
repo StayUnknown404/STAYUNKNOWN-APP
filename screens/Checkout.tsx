@@ -239,7 +239,7 @@ export default function Checkout({ onBack, onComplete }: Props) {
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
         <View style={styles.header}>
           <Pressable onPress={onBack} hitSlop={10} disabled={busy}>
-            <Text style={styles.back}>← BACK</Text>
+            <Text style={styles.back}>←</Text>
           </Pressable>
           <Text style={styles.title}>CHECKOUT</Text>
           <View style={styles.headerSpacer} />
@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
   content: { padding: 20, paddingBottom: 60 },
   header: { height: 55, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   headerSpacer: { width: 45 },
-  back: { color: '#fff', fontSize: 10, fontWeight: '900' },
+  back: { color: '#fff', fontSize: 26, fontWeight: '400', lineHeight: 30, width: 45 },
   title: { color: '#fff', fontSize: 15, fontWeight: '900', letterSpacing: 1 },
   stepRow: { flexDirection: 'row', gap: 18, borderBottomWidth: 1, borderBottomColor: '#222', paddingBottom: 14 },
   stepActive: { color: '#fff', fontSize: 9, fontWeight: '900', letterSpacing: 1 },
