@@ -61,6 +61,16 @@ async function request<T>(path: string, options: RequestInit = {}, authRequired 
   return data as T;
 }
 
+export async function registerPushToken(token: string) {
+  const cleanToken = String(token || '').trim();
+  if (!cleanToken) throw new Error('Push token is empty.');
+
+  return request<{ ok: boolean }>('/api/push-token', {
+    method: 'POST',
+    body: JSON.stringify({ token: cleanToken }),
+  }, true);
+}
+
 export async function getCatalog() {
   const data = await request<{ products?: Product[] }>('/api/catalog');
   return Array.isArray(data.products) ? data.products : [];
