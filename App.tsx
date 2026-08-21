@@ -10,6 +10,7 @@ import {
 import Home from './screens/Home';
 import CreateProfile from './screens/CreateProfile';
 import { auth, onAuthStateChanged, User } from './services/firebase';
+import { registerForPushNotificationsAsync } from './services/pushNotifications';
 
 type EntryView = 'welcome' | 'profile' | 'store';
 
@@ -19,14 +20,21 @@ export default function App() {
   const [entryView, setEntryView] = useState<EntryView>(auth.currentUser ? 'store' : 'welcome');
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, currentUser => {
-      setUser(currentUser);
-      setReady(true);
-      if (currentUser) setEntryView('store');
-    });
+  const unsubscribe = onAuthStateChanged(auth, currentUser => {
+    setUser(currentUser);
+    setReady(true);
 
-    return unsubscribe;
-  }, []);
+    if (currentUser) {
+      setEntryView('store');
+
+      registerForPushNotificationsAsync().catch(error => {
+        console.warn('Push notification registration failed:', error);
+      });
+    }
+  });
+
+  return unsubscribe;
+}, []);
 
   if (!ready) {
     return (
