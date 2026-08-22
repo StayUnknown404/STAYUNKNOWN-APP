@@ -3,7 +3,7 @@ import { Alert, ActivityIndicator, Image, Linking, Pressable, SafeAreaView, Scro
 import * as ImagePicker from 'expo-image-picker';
 import * as ImageManipulator from 'expo-image-manipulator';
 import * as FileSystem from 'expo-file-system/legacy';
-import { checkAdmin, createAdminCollection, createAdminPromo, deleteAdminCollection, deleteAdminPromo, getAdminCollections, getAdminInventory, getAdminNotifications, getAdminOrders, getAdminPromos, getAdminRestockSubscriptions, getAdminSupport, markAdminNotificationRead, createAdminNotification, updateAdminNotification, deleteAdminNotification, replyToSupportTicket, updateAdminCollection, updateAdminPromo, updateOrderDelivery, updateSupportStatus } from '../services/admin';
+import { checkAdmin, createAdminCollection, createAdminPromo, deleteAdminCollection, deleteAdminPromo, getAdminCollections, getAdminInventory, getAdminNotifications, getAdminOrders, getAdminProducts, getAdminPromos, getAdminRestockSubscriptions, getAdminSupport, markAdminNotificationRead, createAdminNotification, updateAdminNotification, deleteAdminNotification, replyToSupportTicket, updateAdminCollection, updateAdminPromo, updateOrderDelivery, updateSupportStatus } from '../services/admin';
 import AdminProducts from './AdminProducts';
 
 type Props={onBack:()=>void};
@@ -118,14 +118,106 @@ function InventoryAdmin(){
  return <View><View style={styles.sectionHeader}><Text style={styles.sectionTitle}>INVENTORY · {filtered.length}</Text><Pressable onPress={()=>void load()}><Text style={styles.add}>REFRESH</Text></Pressable></View><TextInput style={styles.input} value={query} onChangeText={setQuery} placeholder="SEARCH PRODUCT / CATEGORY / ID" placeholderTextColor="#555" autoCapitalize="none"/><Pressable style={[styles.smallButton,lowOnly&&styles.smallActive]} onPress={()=>setLowOnly(v=>!v)}><Text style={styles.smallText}>{lowOnly?'LOW STOCK ONLY ✓':'SHOW LOW STOCK ONLY'}</Text></Pressable>{filtered.length===0?<Text style={styles.muted}>No inventory records match this view.</Text>:filtered.map(i=><View key={i.id} style={styles.card}><View style={styles.sectionHeader}><View style={styles.flex}><Text style={styles.rowTitle}>{i.name||i.id}</Text><Text style={styles.rowMeta}>{i.category||'—'} · threshold {i.lowStockThreshold}</Text></View><Text style={[styles.stockNumber,i.stock<=i.lowStockThreshold&&styles.lowStock]}>{i.stock}</Text></View><View style={styles.statusRow}><Pressable style={styles.smallButton} disabled={saving===i.id} onPress={()=>void adjust(i,-1)}><Text style={styles.smallText}>−1</Text></Pressable><Pressable style={styles.smallButton} disabled={saving===i.id} onPress={()=>void adjust(i,1)}><Text style={styles.smallText}>+1</Text></Pressable><TextInput style={[styles.input,styles.stockInput]} value={draft[i.id]||''} onChangeText={v=>setDraft(d=>({...d,[i.id]:v.replace(/\D/g,'')}))} placeholder="SET" placeholderTextColor="#555" keyboardType="numeric"/><Pressable style={styles.smallButton} disabled={saving===i.id} onPress={()=>void setStock(i)}><Text style={styles.smallText}>{saving===i.id?'SAVING':'SET STOCK'}</Text></Pressable></View></View>)}</View>}
 
 function PromosAdmin(){
- const [list,setList]=useState<any[]>([]);const [editing,setEditing]=useState<any|null>(null);const [code,setCode]=useState('');const [value,setValue]=useState('10');const [type,setType]=useState<'percent'|'fixed'>('percent');const [minOrder,setMinOrder]=useState('0');const [starts,setStarts]=useState('');const [ends,setEnds]=useState('');const [active,setActive]=useState(true);const [loading,setLoading]=useState(true);const [saving,setSaving]=useState(false);
- const load=async()=>{try{setList(await getAdminPromos());}catch(e:any){Alert.alert('Promos failed',e?.message||'Please try again.');}finally{setLoading(false);}};useEffect(()=>{void load();},[]);
- function edit(c:any){setEditing(c);setCode(c.code||'');setValue(String(c.value??10));setType(c.type==='fixed'?'fixed':'percent');setMinOrder(String(c.minOrder??0));setStarts(c.startsAt||c.startDate||'');setEnds(c.endsAt||c.endDate||'');setActive(c.active!==false);}
- function reset(){setEditing(null);setCode('');setValue('10');setType('percent');setMinOrder('0');setStarts('');setEnds('');setActive(true);}
- async function save(){if(!code.trim())return Alert.alert('Code required');const n=Number(value),min=Number(minOrder);if(!Number.isFinite(n)||n<0)return Alert.alert('Invalid discount');if(!Number.isFinite(min)||min<0)return Alert.alert('Invalid minimum order');try{setSaving(true);const payload={code:code.trim().toUpperCase(),type,value:n,active,minOrder:min,startsAt:starts.trim()||null,endsAt:ends.trim()||null};if(editing)await updateAdminPromo(editing.code,payload);else await createAdminPromo(payload);reset();await load();Alert.alert('Saved','Promotion saved successfully.');}catch(e:any){Alert.alert('Save failed',e?.message||'Please try again.');}finally{setSaving(false);}}
+ const [list,setList]=useState<any[]>([]);
+ const [products,setProducts]=useState<any[]>([]);
+ const [collections,setCollections]=useState<any[]>([]);
+ const [screen,setScreen]=useState<'list'|'editor'>('list');
+ const [editing,setEditing]=useState<any|null>(null);
+ const [code,setCode]=useState('');
+ const [value,setValue]=useState('10');
+ const [type,setType]=useState<'percent'|'fixed'>('percent');
+ const [minOrder,setMinOrder]=useState('0');
+ const [starts,setStarts]=useState('');
+ const [ends,setEnds]=useState('');
+ const [active,setActive]=useState(true);
+ const [scope,setScope]=useState<'shop'|'product'|'collection'>('shop');
+ const [targetIds,setTargetIds]=useState<string[]>([]);
+ const [loading,setLoading]=useState(true);
+ const [saving,setSaving]=useState(false);
+
+ const load=async()=>{try{
+   setLoading(true);
+   const [promos,allProducts,allCollections]=await Promise.all([getAdminPromos(),getAdminProducts(),getAdminCollections()]);
+   setList(promos);setProducts(allProducts);setCollections(allCollections);
+ }catch(e:any){Alert.alert('Promos failed',e?.message||'Please try again.');}
+ finally{setLoading(false);}};
+ useEffect(()=>{void load();},[]);
+
+ function openCreate(){
+   setEditing(null);setCode('');setValue('10');setType('percent');setMinOrder('0');setStarts('');setEnds('');
+   setActive(true);setScope('shop');setTargetIds([]);setScreen('editor');
+ }
+ function edit(c:any){
+   const targetType=String(c.targetType||c.applyTo||c.scope||'shop').toLowerCase();
+   const normalizedScope=targetType.includes('product')?'product':targetType.includes('collection')?'collection':'shop';
+   const ids=c.targetIds||c.productIds||c.collectionIds||c.targets||[];
+   setEditing(c);setCode(c.code||'');setValue(String(c.value??10));setType(c.type==='fixed'?'fixed':'percent');
+   setMinOrder(String(c.minOrder??0));setStarts(c.startsAt||c.startDate||'');setEnds(c.endsAt||c.endDate||'');
+   setActive(c.active!==false);setScope(normalizedScope as 'shop'|'product'|'collection');setTargetIds(Array.isArray(ids)?ids.map(String):[]);setScreen('editor');
+ }
+ function backToList(){setScreen('list');setEditing(null);}
+ function toggleTarget(id:string){setTargetIds(current=>current.includes(id)?current.filter(x=>x!==id):[...current,id]);}
+ async function save(){
+   if(!code.trim())return Alert.alert('Code required');
+   const n=Number(value),min=Number(minOrder);
+   if(!Number.isFinite(n)||n<0)return Alert.alert('Invalid discount');
+   if(!Number.isFinite(min)||min<0)return Alert.alert('Invalid minimum order');
+   if(scope!=='shop'&&targetIds.length===0)return Alert.alert('Choose a target',`Select at least one ${scope}.`);
+   try{
+     setSaving(true);
+     const payload={
+       code:code.trim().toUpperCase(),type,value:n,active,minOrder:min,
+       startsAt:starts.trim()||null,endsAt:ends.trim()||null,
+       targetType:scope,applyTo:scope,
+       targetIds:scope==='shop'?[]:targetIds,
+       productIds:scope==='product'?targetIds:[],
+       collectionIds:scope==='collection'?targetIds:[]
+     };
+     if(editing)await updateAdminPromo(editing.code,payload);else await createAdminPromo(payload);
+     await load();backToList();Alert.alert('Saved','Promotion saved successfully.');
+   }catch(e:any){Alert.alert('Save failed',e?.message||'Please try again.');}
+   finally{setSaving(false);}
+ }
  async function toggle(c:any){try{await updateAdminPromo(c.code,{active:c.active===false});await load();}catch(e:any){Alert.alert('Update failed',e?.message||'Please try again.');}}
  async function remove(c:any){Alert.alert('Delete promotion?',c.code,[{text:'CANCEL',style:'cancel'},{text:'DELETE',style:'destructive',onPress:async()=>{try{await deleteAdminPromo(c.code);await load();}catch(e:any){Alert.alert('Delete failed',e?.message||'Please try again.');}}}]);}
- if(loading)return <ActivityIndicator color="#fff"/>;return <View><View style={styles.sectionHeader}><Text style={styles.sectionTitle}>PROMOTIONS · {list.length}</Text><Pressable onPress={reset}><Text style={styles.add}>+ NEW</Text></Pressable></View><View style={styles.editor}><TextInput style={styles.input} value={code} onChangeText={setCode} placeholder="PROMO CODE" placeholderTextColor="#555" autoCapitalize="characters"/><View style={styles.statusRow}><Pressable style={[styles.smallButton,type==='percent'&&styles.smallActive]} onPress={()=>setType('percent')}><Text style={styles.smallText}>%</Text></Pressable><Pressable style={[styles.smallButton,type==='fixed'&&styles.smallActive]} onPress={()=>setType('fixed')}><Text style={styles.smallText}>₦ FIXED</Text></Pressable></View><TextInput style={styles.input} value={value} onChangeText={setValue} placeholder="DISCOUNT" placeholderTextColor="#555" keyboardType="numeric"/><TextInput style={styles.input} value={minOrder} onChangeText={setMinOrder} placeholder="MIN ORDER (NGN)" placeholderTextColor="#555" keyboardType="numeric"/><TextInput style={styles.input} value={starts} onChangeText={setStarts} placeholder="START DATE / ISO (OPTIONAL)" placeholderTextColor="#555"/><TextInput style={styles.input} value={ends} onChangeText={setEnds} placeholder="END DATE / ISO (OPTIONAL)" placeholderTextColor="#555"/><Pressable style={[styles.smallButton,active&&styles.smallActive]} onPress={()=>setActive(v=>!v)}><Text style={styles.smallText}>{active?'ACTIVE ✓':'INACTIVE'}</Text></Pressable><Pressable style={styles.white} onPress={()=>void save()} disabled={saving}>{saving?<ActivityIndicator color="#000"/>:<Text style={styles.black}>{editing?'SAVE PROMOTION':'CREATE PROMOTION'}</Text>}</Pressable><Pressable style={styles.cancel} onPress={reset}><Text style={styles.cancelText}>RESET</Text></Pressable></View>{list.map(c=><View key={c.code} style={styles.row}><View style={styles.flex}><Text style={styles.rowTitle}>{c.code}</Text><Text style={styles.rowMeta}>{c.type} · {c.value}{c.type==='percent'?'%':' NGN'} · min ₦{Number(c.minOrder||0).toLocaleString('en-NG')} · {c.active?'ACTIVE':'INACTIVE'}</Text><Text style={styles.rowMeta}>{c.startsAt||c.startDate?'Starts '+(c.startsAt||c.startDate):'No start'} · {c.endsAt||c.endDate?'Ends '+(c.endsAt||c.endDate):'No end'}</Text></View><View style={styles.statusRow}><Pressable onPress={()=>edit(c)}><Text style={styles.edit}>EDIT</Text></Pressable><Pressable onPress={()=>void toggle(c)}><Text style={styles.edit}>{c.active?'DISABLE':'ENABLE'}</Text></Pressable><Pressable onPress={()=>void remove(c)}><Text style={styles.remove}>DELETE</Text></Pressable></View></View>)}</View>}
+
+ if(loading)return <View style={styles.center}><ActivityIndicator color="#fff"/><Text style={styles.muted}>LOADING PROMOTIONS…</Text></View>;
+ if(screen==='editor')return <View>
+   <View style={styles.editorHeader}><Pressable onPress={backToList}><Text style={styles.back}>←</Text></Pressable><Text style={styles.editorPageTitle}>{editing?'EDIT PROMOTION':'CREATE PROMOTION'}</Text><View style={styles.headerSpacer}/></View>
+   <View style={styles.editor}>
+    <Text style={styles.editorTitle}>{editing?'EDIT PROMOTION':'NEW PROMOTION'}</Text>
+    <TextInput style={styles.input} value={code} onChangeText={setCode} placeholder="PROMO CODE" placeholderTextColor="#555" autoCapitalize="characters"/>
+    <Text style={styles.label}>DISCOUNT TYPE</Text>
+    <View style={styles.statusRow}><Pressable style={[styles.smallButton,type==='percent'&&styles.smallActive]} onPress={()=>setType('percent')}><Text style={[styles.smallText,type==='percent'&&styles.smallTextActive]}>PERCENT %</Text></Pressable><Pressable style={[styles.smallButton,type==='fixed'&&styles.smallActive]} onPress={()=>setType('fixed')}><Text style={[styles.smallText,type==='fixed'&&styles.smallTextActive]}>FIXED ₦</Text></Pressable></View>
+    <TextInput style={styles.input} value={value} onChangeText={setValue} placeholder="DISCOUNT" placeholderTextColor="#555" keyboardType="numeric"/>
+    <TextInput style={styles.input} value={minOrder} onChangeText={setMinOrder} placeholder="MIN ORDER (NGN)" placeholderTextColor="#555" keyboardType="numeric"/>
+    <Text style={styles.label}>PROMOTION APPLIES TO</Text>
+    <View style={styles.statusRow}>
+      {([['shop','WHOLE SHOP'],['product','SPECIFIC PRODUCTS'],['collection','SPECIFIC COLLECTIONS']] as const).map(([key,label])=><Pressable key={key} style={[styles.smallButton,scope===key&&styles.smallActive]} onPress={()=>{setScope(key);if(key==='shop')setTargetIds([]);}}><Text style={[styles.smallText,scope===key&&styles.smallTextActive]}>{label}</Text></Pressable>)}
+    </View>
+    {scope==='product'?<View style={styles.productPicker}>{products.map((item:any)=><Pressable key={item.id} style={[styles.pickRow,targetIds.includes(String(item.id))&&styles.pickSelected]} onPress={()=>toggleTarget(String(item.id))}><Text style={[styles.pickName,targetIds.includes(String(item.id))&&styles.pickNameSelected]}>{item.name||item.id}</Text><Text style={[styles.pickMark,targetIds.includes(String(item.id))&&styles.pickMarkSelected]}>{targetIds.includes(String(item.id))?'✓':''}</Text></Pressable>)}</View>:null}
+    {scope==='collection'?<View style={styles.productPicker}>{collections.map((item:any)=><Pressable key={item.id} style={[styles.pickRow,targetIds.includes(String(item.id))&&styles.pickSelected]} onPress={()=>toggleTarget(String(item.id))}><Text style={[styles.pickName,targetIds.includes(String(item.id))&&styles.pickNameSelected]}>{item.name||item.id}</Text><Text style={[styles.pickMark,targetIds.includes(String(item.id))&&styles.pickMarkSelected]}>{targetIds.includes(String(item.id))?'✓':''}</Text></Pressable>)}</View>:null}
+    <TextInput style={styles.input} value={starts} onChangeText={setStarts} placeholder="START DATE / ISO (OPTIONAL)" placeholderTextColor="#555"/>
+    <TextInput style={styles.input} value={ends} onChangeText={setEnds} placeholder="END DATE / ISO (OPTIONAL)" placeholderTextColor="#555"/>
+    <Pressable style={[styles.smallButton,active&&styles.smallActive]} onPress={()=>setActive(v=>!v)}><Text style={[styles.smallText,active&&styles.smallTextActive]}>{active?'ENABLED ✓':'DISABLED'}</Text></Pressable>
+    <Pressable style={styles.collectionSave} onPress={()=>void save()} disabled={saving}>{saving?<ActivityIndicator color="#000"/>:<Text style={styles.collectionSaveText}>{editing?'SAVE PROMOTION':'CREATE PROMOTION'}</Text>}</Pressable>
+    <Pressable style={styles.cancel} onPress={backToList}><Text style={styles.cancelText}>BACK TO PROMOTIONS</Text></Pressable>
+    {editing?<Pressable style={styles.delete} onPress={()=>void remove(editing)}><Text style={styles.deleteText}>DELETE PROMOTION</Text></Pressable>:null}
+   </View>
+  </View>;
+
+ return <View>
+  <View style={styles.sectionHeader}><View><Text style={styles.sectionTitle}>PROMOTIONS</Text><Text style={styles.muted}>{list.length} PROMOTION{list.length===1?'':'S'}</Text></View><View style={styles.statusRow}><Pressable style={styles.collectionCreateButton} onPress={openCreate}><Text style={styles.collectionCreateText}>+ CREATE</Text></Pressable><Pressable onPress={()=>void load()}><Text style={styles.add}>REFRESH</Text></Pressable></View></View>
+  {list.length===0?<Text style={styles.muted}>No promotions.</Text>:list.map(c=>{
+    const targetType=String(c.targetType||c.applyTo||c.scope||'shop').toLowerCase();
+    const targetLabel=targetType.includes('product')?'PRODUCTS':targetType.includes('collection')?'COLLECTIONS':'WHOLE SHOP';
+    return <View key={c.code} style={styles.card}>
+      <Pressable onPress={()=>edit(c)}><View style={styles.sectionHeader}><View style={styles.flex}><Text style={styles.rowTitle}>{c.code}</Text><Text style={styles.rowMeta}>{c.type} · {c.value}{c.type==='percent'?'%':' NGN'} · {targetLabel}</Text><Text style={styles.rowMeta}>{c.minOrder?'MIN ₦'+Number(c.minOrder).toLocaleString('en-NG')+' · ':''}{c.active?'ACTIVE':'INACTIVE'}{c.startsAt||c.startDate?' · STARTS '+(c.startsAt||c.startDate):''}{c.endsAt||c.endDate?' · ENDS '+(c.endsAt||c.endDate):''}</Text></View><Text style={styles.collectionChevron}>›</Text></View></Pressable>
+      <View style={styles.statusRow}><Pressable style={[styles.smallButton,c.active&&styles.smallActive]} onPress={()=>void toggle(c)}><Text style={[styles.smallText,c.active&&styles.smallTextActive]}>{c.active?'ENABLED ✓':'DISABLED'}</Text></Pressable><Pressable onPress={()=>edit(c)}><Text style={styles.edit}>EDIT</Text></Pressable><Pressable onPress={()=>void remove(c)}><Text style={styles.remove}>DELETE</Text></Pressable></View>
+    </View>;
+  })}
+ </View>;
+}
 
 function RestockAdmin(){
  const [list,setList]=useState<any[]>([]);const [products,setProducts]=useState<any[]>([]);const [query,setQuery]=useState('');const [loading,setLoading]=useState(true);
