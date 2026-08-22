@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "453624121758",
+    "project_id": "stayunknown-auth",
+    "storage_bucket": "stayunknown-auth.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:453624121758:android:628ca1b53daca2d7c4ae8f",
+        "android_client_info": {
+          "package_name": "com.stayunknown.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCf_QNWVkYKA-X6cT4iNvxFD-nYE6dLe6M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
