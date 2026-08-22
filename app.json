@@ -11,6 +11,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.stayunknown.app",
       "googleServicesFile": "./google-services.json"
     },
     "plugins": [
