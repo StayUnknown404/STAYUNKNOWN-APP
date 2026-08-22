@@ -4,11 +4,14 @@ import { getOrderHistory, getOrder, Order } from '../services/api';
 
 const STATUSES = ['ALL','PENDING','PAID','PROCESSING','PACKED','SHIPPED','DELIVERED','FAILED'];
 
-export default function Orders(){
+type Props = { initialOrderId?: string };
+
+export default function Orders({ initialOrderId }: Props){
   const [orders,setOrders]=useState<Order[]>([]); const [query,setQuery]=useState(''); const [status,setStatus]=useState('ALL');
   const [selected,setSelected]=useState<Order|null>(null); const [loading,setLoading]=useState(true); const [error,setError]=useState('');
   const load=async()=>{try{setLoading(true);setError('');setOrders(await getOrderHistory());}catch(e:any){setError(e?.message||'Unable to load orders.');}finally{setLoading(false);}};
   useEffect(()=>{void load();},[]);
+  useEffect(()=>{if(initialOrderId && orders.length){const match=orders.find(o=>String(o.id)===String(initialOrderId));if(match)void open(match);}},[initialOrderId,orders.length]);
   const filtered=useMemo(()=>orders.filter(o=>{const text=JSON.stringify(o).toLowerCase();const matches=!query.trim()||text.includes(query.trim().toLowerCase());const s=String(o.deliveryStatus||o.status||o.paymentStatus||'PENDING').toUpperCase();return matches&&(status==='ALL'||s===status);}),[orders,query,status]);
   async function open(o:Order){try{setSelected(await getOrder(o.id));}catch{setSelected(o);}}
   if(selected)return <OrderDetails order={selected} onBack={()=>setSelected(null)}/>;

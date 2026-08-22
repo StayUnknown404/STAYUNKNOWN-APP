@@ -2,11 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { createSupportTicket, getSupportTickets, replyToSupportTicket, SupportTicket } from '../services/api';
 
-type Props = { onBack: () => void };
+type Props = { onBack: () => void; initialTicketId?: string };
 
 type Reply = { message?: string; from?: string; sender?: string; createdAt?: string; date?: string };
 
-export default function Support({ onBack }: Props) {
+export default function Support({ onBack, initialTicketId }: Props) {
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [selected, setSelected] = useState<SupportTicket | null>(null);
   const [subject, setSubject] = useState('');
@@ -23,6 +23,7 @@ export default function Support({ onBack }: Props) {
     finally { setLoading(false); }
   };
   useEffect(() => { void load(); }, []);
+  useEffect(() => { if (initialTicketId && tickets.length) { const match = tickets.find(t => String(t.id) === String(initialTicketId)); if (match) setSelected(match); } }, [initialTicketId, tickets.length]);
 
   async function create() {
     if (!subject.trim() || !message.trim() || sending) return;
